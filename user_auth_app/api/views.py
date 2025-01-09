@@ -31,3 +31,6 @@ class RegistrationView(APIView):
 class UserProfileDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = UserProfile.objects.all()
     serializer_class = UserProfileSerializer
+    
+    def get_object(self):
+        return UserProfile.objects.get(user_id=self.kwargs['pk'])
