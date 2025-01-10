@@ -54,11 +54,11 @@ class RegistrationSerializer(serializers.ModelSerializer):
         return user
     
 class UserProfileSerializer(serializers.ModelSerializer):
-    id = serializers.IntegerField(source='user.id', read_only=True)
+    user = serializers.IntegerField(source='user.id', read_only=True)
     username = serializers.CharField(source='user.username', read_only=True)
     email = serializers.EmailField(source='user.email', read_only=True)
     
     class Meta:
         model = UserProfile
-        fields = ['id', 'username', 'email', 'file', 'location', 'tel', 'description', 'working_hours', 'type', 'created_at']
-        read_only_fields = ['id', 'created_at']
+        fields = ['user', 'username', 'email', 'file', 'location', 'tel', 'description', 'working_hours', 'type', 'created_at']
+        read_only_fields = ['user', 'created_at']
