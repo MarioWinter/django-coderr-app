@@ -1,0 +1,16 @@
+{
+	"configurations": [
+		{
+			"type": "debugpy",
+			"request": "launch",
+			"name": "Launch Django App",
+			"program": "${workspaceFolder}/manage.py",
+			"args": ["runserver", "127.0.0.1:8000"],
+			"django": true,
+			"justMyCode": true,
+			"env": {
+				"DJANGO_SETTINGS_MODULE": "coderr_app.settings"
+			}
+		}
+	]
+}

@@ -1,12 +1,12 @@
 from rest_framework import status, viewsets, generics
 from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
-#from user_auth_app.api.permissions import ProfilePermission, IsOwnerOrAdmin
 from rest_framework.authtoken.models import Token
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.response import Response
 
 from user_auth_app.models import UserProfile
+from user_auth_app.api.permissions import ProfilePermission
 from .serializers import RegistrationSerializer, UserProfileSerializer
 
 class RegistrationView(APIView):
@@ -31,6 +31,9 @@ class RegistrationView(APIView):
 class UserProfileDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = UserProfile.objects.all()
     serializer_class = UserProfileSerializer
+    permission_classes = [ProfilePermission]
     
     def get_object(self):
-        return UserProfile.objects.get(user_id=self.kwargs['pk'])
+        obj = UserProfile.objects.get(user_id=self.kwargs['pk'])
+        self.check_object_permissions(self.request, obj)
+        return obj
