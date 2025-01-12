@@ -73,3 +73,14 @@ class UserProfileBusinessSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserProfile
         fields = ['pk', 'username', 'first_name', 'last_name', 'file', 'location', 'tel', 'description', 'working_hours', 'type']
+
+
+class UserProfileCustomerSerializer(serializers.ModelSerializer):
+    pk = serializers.IntegerField(source='user.id', read_only=True)
+    username = serializers.CharField(source='user.username', read_only=True)
+    first_name = serializers.EmailField(source='user.first_name', read_only=True)
+    last_name = serializers.EmailField(source='user.last_name', read_only=True)
+    
+    class Meta:
+        model = UserProfile
+        fields = ['pk', 'username', 'first_name', 'last_name', 'file', 'uploaded_at', 'type']

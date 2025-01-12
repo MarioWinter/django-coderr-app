@@ -14,6 +14,7 @@ class UserProfile(models.Model):
     working_hours = models.CharField(max_length=100, blank=True, null=True)
     type = models.CharField(max_length=8, choices=UserType.choices, default=UserType.CUSTOMER)
     created_at = models.DateTimeField(default=timezone.now)
+    uploaded_at = models.DateTimeField(blank=True, null=True)
     
 
     def __str__(self):
