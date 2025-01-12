@@ -7,7 +7,7 @@ from rest_framework.response import Response
 
 from user_auth_app.models import UserProfile
 from user_auth_app.api.permissions import ProfilePermission
-from .serializers import RegistrationSerializer, UserProfileSerializer, UserProfileBusinessSerializer
+from .serializers import RegistrationSerializer, UserProfileSerializer, UserProfileBusinessSerializer, UserProfileCustomerSerializer
 
 class RegistrationView(APIView):
     permission_classes = [AllowAny]
@@ -41,4 +41,9 @@ class UserProfileDetail(generics.RetrieveUpdateDestroyAPIView):
 class UserProfileBusniessList(generics.ListAPIView):
     queryset = UserProfile.objects.filter(type=UserProfile.UserType.BUSINESS)
     serializer_class = UserProfileBusinessSerializer
+    permission_classes = [ProfilePermission]
+    
+class UserProfileCustomerList(generics.ListAPIView):
+    queryset = UserProfile.objects.filter(type=UserProfile.UserType.CUSTOMER)
+    serializer_class = UserProfileCustomerSerializer
     permission_classes = [ProfilePermission]
