@@ -2,6 +2,7 @@ from rest_framework import serializers
 from django.contrib.auth.models import User
 from user_auth_app.models import UserProfile
 
+
 class RegistrationSerializer(serializers.ModelSerializer):
     repeated_password = serializers.CharField(write_only=True)
     type = serializers.ChoiceField(choices=UserProfile.UserType.choices, write_only=True)
@@ -30,15 +31,6 @@ class RegistrationSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError({'username':['Dieser Benutzername ist bereits vergeben.']})
         return value
     
-    # def validate_email(self, value):
-        
-    #     if value == '':
-    #         raise serializers.ValidationError({'email':['Dieses Feld darf nicht leer sein.']})
-        
-    #     if User.objects.filter(email=value).exists():
-    #         raise serializers.ValidationError({'email':['Diese E-Mail-Adresse wird bereits verwendet.']})
-    #     return value
-
     def save(self):
         
         username = self.validated_data['username']
@@ -52,7 +44,8 @@ class RegistrationSerializer(serializers.ModelSerializer):
         
         UserProfile.objects.create(user=user, type=user_type)
         return user
-    
+
+
 class UserProfileSerializer(serializers.ModelSerializer):
     user = serializers.IntegerField(source='user.id', read_only=True)
     username = serializers.CharField(source='user.username', read_only=True)
