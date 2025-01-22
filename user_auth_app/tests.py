@@ -41,7 +41,6 @@ class UserAuthAppTest(APITestCase):
         self.client2 = APIClient(enforce_csrf_checks=True)
         self.client2.credentials(HTTP_AUTHORIZATION='Token ' + self.token2.key)
         
-    
     def test_registration_user(self):
         client2 = APIClient()
         url = reverse('registration')
@@ -74,6 +73,22 @@ class UserAuthAppTest(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data, expected_data)
     
+    
+    def test_patch_userprofile_detail(self):
+        url = reverse('userprofile-detail', kwargs={'pk': self.user.id})
+        data = {
+            'username':'customeruser',
+            'tel': '+49040123333',
+        }
+        response = self.client.patch(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(UserProfile.objects.count(), 2)
+        updated_profile = UserProfile.objects.get(user_id=self.user.id)
+        self.assertEqual(updated_profile.user.username, 'customeruser')
+        self.assertEqual(updated_profile.tel, '+49040123333')
+    
+    
+    
     def test_get_userprofile_customer_list(self):
         url = reverse('userprofile-customer-list')
         response = self.client.get(url)
@@ -88,4 +103,8 @@ class UserAuthAppTest(APITestCase):
         response = self.client2.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 1)
+        self.assertEqual(response.data[0]['type'], 'business')
+        
+    #Permission Tests
+    #Unauth Tests
         

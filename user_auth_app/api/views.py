@@ -38,6 +38,23 @@ class UserProfileDetail(generics.RetrieveUpdateDestroyAPIView):
         self.check_object_permissions(self.request, obj)
         return obj
     
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+
+        user_data = serializer.validated_data.pop('user', {})
+        user = instance.user
+        if 'username' in user_data:
+            user.username = user_data['username']
+        if 'email' in user_data:
+            user.email = user_data['email']
+        user.save()
+        
+        self.perform_update(serializer)
+        return Response(serializer.data)
+    
 class UserProfileBusniessList(generics.ListAPIView):
     queryset = UserProfile.objects.filter(type=UserProfile.UserType.BUSINESS)
     serializer_class = UserProfileBusinessSerializer
