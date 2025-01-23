@@ -55,7 +55,7 @@ class UserProfileDetail(generics.RetrieveUpdateDestroyAPIView):
         self.perform_update(serializer)
         return Response(serializer.data)
     
-class UserProfileBusniessList(generics.ListAPIView):
+class UserProfileBusinessList(generics.ListAPIView):
     queryset = UserProfile.objects.filter(type=UserProfile.UserType.BUSINESS)
     serializer_class = UserProfileBusinessSerializer
     permission_classes = [ProfilePermission]

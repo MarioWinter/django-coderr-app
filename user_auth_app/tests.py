@@ -106,5 +106,34 @@ class UserAuthAppTest(APITestCase):
         self.assertEqual(response.data[0]['type'], 'business')
         
     #Permission Tests
-    #Unauth Tests
+    
+    #unauthorized user
+    def test_get_userprofile_detail_unauthorized(self):
+        self.csrf_client = APIClient(enforce_csrf_checks=True)
+        url = reverse('userprofile-detail', kwargs={'pk': self.user.id})
+        response = self.csrf_client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+    
+    
+    def test_patch_userprofile_detail_unauthorized(self):
+        self.csrf_client = APIClient(enforce_csrf_checks=True)
+        url = reverse('userprofile-detail', kwargs={'pk': self.user.id})
+        data = {
+            'username':'maximustermann',
+        }
+        response = self.csrf_client.patch(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+      
+    def test_get_userprofile_customer_listt_unauthorized(self):
+        self.csrf_client = APIClient(enforce_csrf_checks=True)
+        url = reverse('userprofile-customer-list')
+        response = self.csrf_client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+       
+    def test_get_userprofile_business_listt_unauthorized(self):
+        self.csrf_client = APIClient(enforce_csrf_checks=True)
+        url = reverse('userprofile-business-list')
+        response = self.csrf_client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+    
         
