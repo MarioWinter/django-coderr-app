@@ -57,8 +57,8 @@ MIDDLEWARE = [
 CSRF_TRUSTED_ORIGINS = [
 
   'http://127.0.0.1:5500',
-
   'http://localhost:5500',
+  'http://192.168.2.103:5500',
 
 ]
 
@@ -67,8 +67,8 @@ CSRF_TRUSTED_ORIGINS = [
 CORS_ALLOWED_ORIGINS = [
 
   'http://127.0.0.1:5500',
-
   'http://localhost:5500',
+  'http://192.168.2.103:5500',
 
 ]
 

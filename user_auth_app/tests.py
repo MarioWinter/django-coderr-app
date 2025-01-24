@@ -121,7 +121,7 @@ class UserAuthAppTest(APITestCase):
             'password': 'irgendeinpasswort'
         }
         response = client.post(url, data, format='json')
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn('non_field_errors', response.data)
         self.assertEqual(
             response.data['non_field_errors'][0],

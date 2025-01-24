@@ -43,9 +43,9 @@ class CustomLoginView(ObtainAuthToken):
                 'email' : user.email,
                 'user_id' : user.id
             }
+            return Response(data, status=status.HTTP_200_OK)
         else:
-            data = serializer.errors
-        return Response(data)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class UserProfileDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = UserProfile.objects.all()
