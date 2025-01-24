@@ -42,7 +42,7 @@ class UserAuthAppTest(APITestCase):
         self.client2.credentials(HTTP_AUTHORIZATION='Token ' + self.token2.key)
         
     def test_registration_user(self):
-        client2 = APIClient()
+        client = APIClient()
         url = reverse('registration')
         data = {
             'username': 'leonwinter',
@@ -51,11 +51,21 @@ class UserAuthAppTest(APITestCase):
             'repeated_password': 'werte',
             'type': 'customer'
         }
-        response = client2.post(url, data, format='json')
+        response = client.post(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(User.objects.count(), 3)
-        
-        
+    
+    def test_login_user(self):
+        client = APIClient()
+        url = reverse('login')
+        data = {
+            'username': 'testbusinessuser',
+            'password': 'werte12345'
+        }
+        response = client.post(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIn('token', response.data)
+
     def test_get_userprofile_detail(self):
         url = reverse('userprofile-detail', kwargs={'pk': self.user.id})
         response = self.client.get(url)
@@ -73,7 +83,6 @@ class UserAuthAppTest(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data, expected_data)
     
-    
     def test_patch_userprofile_detail(self):
         url = reverse('userprofile-detail', kwargs={'pk': self.user.id})
         data = {
@@ -87,8 +96,6 @@ class UserAuthAppTest(APITestCase):
         self.assertEqual(updated_profile.user.username, 'customeruser')
         self.assertEqual(updated_profile.tel, '+49040123333')
     
-    
-    
     def test_get_userprofile_customer_list(self):
         url = reverse('userprofile-customer-list')
         response = self.client.get(url)
@@ -96,8 +103,6 @@ class UserAuthAppTest(APITestCase):
         self.assertEqual(len(response.data), 1)
         self.assertEqual(response.data[0]['type'], 'customer')
         
-
-
     def test_get_userprofile_business_list(self):
         url = reverse('userprofile-business-list')
         response = self.client2.get(url)
@@ -108,6 +113,23 @@ class UserAuthAppTest(APITestCase):
     #Permission Tests
     
     #unauthorized user
+    def test_login_user_unauthorized(self):
+        client = APIClient()
+        url = reverse('login')
+        data = {
+            'username': 'nichtexistierenderuser',
+            'password': 'irgendeinpasswort'
+        }
+        response = client.post(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIn('non_field_errors', response.data)
+        self.assertEqual(
+            response.data['non_field_errors'][0],
+            "Unable to log in with provided credentials."
+        )
+        self.assertNotIn('token', response.data)
+
+    
     def test_get_userprofile_detail_unauthorized(self):
         self.csrf_client = APIClient(enforce_csrf_checks=True)
         url = reverse('userprofile-detail', kwargs={'pk': self.user.id})

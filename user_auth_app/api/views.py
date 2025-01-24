@@ -27,6 +27,25 @@ class RegistrationView(APIView):
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+class CustomLoginView(ObtainAuthToken):
+    permission_classes = [AllowAny]
+    
+    def post(self, request):
+        serializer = self.serializer_class(data=request.data)
+        
+        data = {}
+        if serializer.is_valid():
+            user = serializer.validated_data['user']
+            token, created = Token.objects.get_or_create(user=user)
+            data = {
+                'token' : token.key,
+                'username' : user.username,
+                'email' : user.email,
+                'user_id' : user.id
+            }
+        else:
+            data = serializer.errors
+        return Response(data)
 
 class UserProfileDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = UserProfile.objects.all()
