@@ -46,6 +46,11 @@ class RegistrationSerializer(serializers.ModelSerializer):
         return user
 
 
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['first_name', 'last_name', 'username']
+
 class UserProfileSerializer(serializers.ModelSerializer):
     user = serializers.IntegerField(source='user.id', read_only=True)
     username = serializers.CharField(source='user.username')
