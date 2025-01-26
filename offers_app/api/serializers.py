@@ -1,3 +1,4 @@
+from django.db import transaction
 from rest_framework import serializers
 from offers_app.models import Offer, OfferDetail
 from user_auth_app.api.serializers import UserSerializer
@@ -10,7 +11,7 @@ class OfferDetailSerializer(serializers.ModelSerializer):
         fields = ['id', 'title', 'revisions', 'delivery_time_in_days', 'price', 'features', 'offer_type']
 
 class OfferSerializer(serializers.ModelSerializer):
-    details = OfferDetailSerializer(many=True, read_only=True)
+    details = OfferDetailSerializer(many=True)
     user_details = UserSerializer(source='user', read_only=True)
     class Meta:
         model = Offer
@@ -26,7 +27,18 @@ class OfferSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         details_data = validated_data.pop('details')
-        offer = Offer.objects.create(**validated_data)
-        for detail_data in details_data:
-            OfferDetail.objects.create(offer=offer, **detail_data)
-        return offer
+        with transaction.atomic():
+            offer = Offer.objects.create(**validated_data)
+            for detail_data in details_data:
+                OfferDetail.objects.create(offer=offer, **detail_data)
+            return offer
+    
+    def update(self, instance, validated_data):
+        details_data = validated_data.pop('details')
+        with transaction.atomic():
+            instance = super().update(instance, validated_data)
+            if details_data is not None:
+                instance.details.all().delete()
+                for detail_data in details_data:
+                    OfferDetail.objects.create(offer=instance, **detail_data)
+            return instance
