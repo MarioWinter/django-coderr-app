@@ -17,7 +17,7 @@ class OfferViewSet(viewsets.ModelViewSet):
     ordering_fields = ['updated_at', 'min_price']
     search_fields = ['title', 'description']
 
-class OfferDetailViewSet(viewsets.ModelViewSet):
+class OfferDetailRetrieveView(generics.RetrieveAPIView):
     queryset = OfferDetail.objects.all()
     serializer_class = OfferDetailSerializer
     permission_classes = [OfferDetailPermission]

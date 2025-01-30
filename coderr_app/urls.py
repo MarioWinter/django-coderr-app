@@ -16,15 +16,19 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from user_auth_app.views import redirect_to_admin
+from user_auth_app.views import redirect_to_admin, redirect_to_schema
 #from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView
 
 urlpatterns = [
-    #path('', redirect_to_admin, name='root'),
+    path('', redirect_to_admin, name='root'),
+    #path('', redirect_to_schema, name='root'),
     path('admin/', admin.site.urls),
-
+    path('api/', redirect_to_schema, name='root'),
     path('api/', include('user_auth_app.api.urls')),
+    path('api/', include('offers_app.api.urls')),
     path('api-auth', include('rest_framework.urls')),
+    
+    ## API Schema & Doku
     # path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
     # path('api/schema/swagger-ui/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
     # path('api/schema/redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
