@@ -18,39 +18,43 @@ class OffersAppTest(APITestCase):
     def test_create_offers_list(self):
         url = reverse('offers-list')
         data = {
+            "user": self.user.id,
             "title": "Grafikdesign-Paket",
-            "image": "",
             "description": "Ein umfassendes Grafikdesign-Paket für Unternehmen.",
             "details": [
                 {
-                "title": "Basic Design",
-                "revisions": 2,
-                "delivery_time_in_days": 5,
-                "price": 100.00,
-                "features": ["Logo Design","Visitenkarte"],
-                "offer_type": "basic",
+                    "title": "Basic Design",
+                    "revisions": 2,
+                    "delivery_time_in_days": 5,
+                    "price": "100.00",
+                    "features": ["Logo Design","Visitenkarte"],
+                    "offer_type": "basic",
                 },
                 {
-                "title": "Standard Design",
-                "revisions": 5,
-                "delivery_time_in_days": 7,
-                "price": 200.00,
-                "features": ["Logo Design","Visitenkarte","Briefpapier"],
-                "offer_type": "standard",
+                    "title": "Standard Design",
+                    "revisions": 5,
+                    "delivery_time_in_days": 7,
+                    "price": "200.00",
+                    "features": ["Logo Design","Visitenkarte","Briefpapier"],
+                    "offer_type": "standard",
                 },
                 {
-                "title": "Premium Design",
-                "revisions": 10,
-                "delivery_time_in_days": 10,
-                "price": 500.00,
-                "features": ["Logo Design","Visitenkarte","Briefpapier","Flyer"],
-                "offer_type": "premium",
+                    "title": "Premium Design",
+                    "revisions": 10,
+                    "delivery_time_in_days": 10,
+                    "price": "500.00",
+                    "features": ["Logo Design","Visitenkarte","Briefpapier","Flyer"],
+                    "offer_type": "premium",
                 }
-                ]
-            }
+            ]
+        }
         response = self.client.post(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        print(response.data)
         self.assertEqual(Offer.objects.count(), 1)
-        new_contact = Offer.objects.get(title='Grafikdesign-Paket')
-        self.assertEqual(new_contact.description, 'Ein umfassendes Grafikdesign-Paket für Unternehmen.')
-    
+        new_offer = Offer.objects.get(title='Grafikdesign-Paket')
+        self.assertEqual(new_offer.description, 'Ein umfassendes Grafikdesign-Paket für Unternehmen.')
+        all_details = new_offer.details.all()
+        self.assertEqual(len(all_details), 3, "There should be exactly three detail objects")
+        self.assertEqual(new_offer.user, self.user)
+
