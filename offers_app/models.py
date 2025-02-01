@@ -46,4 +46,4 @@ class OfferDetail(models.Model):
         unique_together = ('offer', 'offer_type')
 
     def __str__(self):
-        return f"title: {self.title}, offer_type: ({self.offer_type})"
+        return f"id: {self.id}, title: {self.title}, offer_type: ({self.offer_type})"

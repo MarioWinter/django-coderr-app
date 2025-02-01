@@ -148,12 +148,12 @@ class OffersAppTest(APITestCase):
         self.assertEqual(Offer.objects.count(), 0)
         self.assertEqual(OfferDetail.objects.count(), 0)
 
-    # def test_get_offer_detail(self):
-    #     """GET /offerdetails/{id}/ should return detail"""
-    #     detail = self.offer.details.first()
-    #     url = reverse('offerdetails-detail', kwargs={'pk': detail.id})
-    #     response = self.client.get(url)
-    #     self.assertEqual(response.status_code, status.HTTP_200_OK)
-    #     self.assertEqual(response.data['offer_type'], 'basic')
-    #     self.assertEqual(float(response.data['price']), 100.00)
+    def test_get_offer_detail(self):
+        """GET /offerdetails/{id}/ should return detail"""
+        detail = self.offer.details.first()
+        url = reverse('offerdetails-detail', kwargs={'pk': detail.id})
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['offer_type'], 'basic')
+        self.assertEqual(float(response.data['price']), 100.00)
 
