@@ -18,7 +18,7 @@ class OfferSerializer(serializers.ModelSerializer):
         fields = ['id', 'user', 'title', 'image', 'description', 'created_at', 'updated_at', 'details', 'min_price', 'min_delivery_time', 'user_details']
 
     def validate_details(self, value):
-            # Nur bei POST die volle Validierung
+            
             if self.context['request'].method == 'POST':
                 if len(value) != 3:
                     raise serializers.ValidationError("Es sind 3 Angebotsdetails erforderlich.")
@@ -27,7 +27,7 @@ class OfferSerializer(serializers.ModelSerializer):
                 if types != {'basic', 'standard', 'premium'}:
                     raise serializers.ValidationError("Alle drei Typen müssen vorhanden sein.")
             
-            # Bei PATCH nur Validierung der vorhandenen Daten
+            
             else:
                 seen_types = set()
                 for detail in value:
@@ -49,11 +49,21 @@ class OfferSerializer(serializers.ModelSerializer):
             return offer
     
     def update(self, instance, validated_data):
-        details_data = validated_data.pop('details')
-        with transaction.atomic():
-            instance = super().update(instance, validated_data)
-            if details_data is not None:
-                instance.details.all().delete()
-                for detail_data in details_data:
-                    OfferDetail.objects.create(offer=instance, **detail_data)
-            return instance
+            details_data = validated_data.pop('details', None)
+            
+            with transaction.atomic():
+                instance = super().update(instance, validated_data)
+                
+                if details_data is not None:
+                    for detail_data in details_data:
+                        offer_type = detail_data['offer_type']
+                        try:
+                            detail = instance.details.get(offer_type=offer_type)
+                            for key, value in detail_data.items():
+                                setattr(detail, key, value)
+                            detail.save()
+                        except OfferDetail.DoesNotExist:
+                            raise serializers.ValidationError(
+                                f"Detail mit Typ {offer_type} existiert nicht"
+                            )
+                return instance
