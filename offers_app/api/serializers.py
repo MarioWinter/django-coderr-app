@@ -18,12 +18,27 @@ class OfferSerializer(serializers.ModelSerializer):
         fields = ['id', 'user', 'title', 'image', 'description', 'created_at', 'updated_at', 'details', 'min_price', 'min_delivery_time', 'user_details']
 
     def validate_details(self, value):
-        if len(value) != 3:
-            raise serializers.ValidationError("Es sind 3 Angebotsdetails (basic, standard, premium) sind erforderlich.")
-        types = [detail['offer_type'] for detail in value]
-        if set(types) != {'basic', 'standard', 'premium'}:
-            raise serializers.ValidationError("Die Angebotsdetails müssen genau einen 'basic', 'standard' und 'premium'-Typ enthalten.")
-        return value
+            # Nur bei POST die volle Validierung
+            if self.context['request'].method == 'POST':
+                if len(value) != 3:
+                    raise serializers.ValidationError("Es sind 3 Angebotsdetails erforderlich.")
+                
+                types = {detail['offer_type'] for detail in value}
+                if types != {'basic', 'standard', 'premium'}:
+                    raise serializers.ValidationError("Alle drei Typen müssen vorhanden sein.")
+            
+            # Bei PATCH nur Validierung der vorhandenen Daten
+            else:
+                seen_types = set()
+                for detail in value:
+                    offer_type = detail.get('offer_type')
+                    if offer_type not in {'basic', 'standard', 'premium'}:
+                        raise serializers.ValidationError(f"Ungültiger Typ: {offer_type}")
+                    if offer_type in seen_types:
+                        raise serializers.ValidationError(f"Doppelter Typ: {offer_type}")
+                    seen_types.add(offer_type)
+            
+            return value
 
     def create(self, validated_data):
         details_data = validated_data.pop('details')
