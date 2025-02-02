@@ -16,6 +16,9 @@ class OfferViewSet(viewsets.ModelViewSet):
     filterset_fields = ['user', 'details__price', 'details__delivery_time_in_days']
     ordering_fields = ['updated_at', 'min_price']
     search_fields = ['title', 'description']
+    
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
 
 class OfferDetailRetrieveView(generics.RetrieveAPIView):
     queryset = OfferDetail.objects.all()

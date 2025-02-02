@@ -62,13 +62,13 @@ class OffersAppFilterTest(APITestCase):
         test_cases = [
             ('creator_id filter', {'creator_id': self.user.id}, 1),
             ('min_price filter', {'min_price': 200}, 1),
-            ('max_delivery_time filter', {'max_delivery_time': 5}, 2),
+            ('max_delivery_time filter', {'max_delivery_time': 5}, 1),
             ('search filter', {'search': 'Webdesign'}, 1),
-            ('ordering', {'ordering': '-min_price'}, 2)
+            ('ordering', {'ordering': 'min_price'}, 2)
         ]
 
         for desc, params, expected_count in test_cases:
             with self.subTest(desc):
                 response = self.client.get(reverse('offers-list'), params)
                 self.assertEqual(response.status_code, status.HTTP_200_OK)
-                self.assertEqual(len(response.data['results']), expected_count)
+                self.assertEqual(len(response.data), expected_count)

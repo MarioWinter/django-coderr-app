@@ -15,7 +15,7 @@ class OffersAppTest(APITestCase):
         self.client = APIClient(enforce_csrf_checks=True)
         self.client.credentials(HTTP_AUTHORIZATION='Token ' + self.token.key)
         self.offer_data = {
-            "user": self.user.id,
+            #"user": self.user.id,
             "title": "Webdesign Paket",
             "description": "Professionelle Webentwicklung",
             "details": [
