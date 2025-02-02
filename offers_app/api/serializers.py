@@ -1,4 +1,4 @@
-from django.db import transaction
+from django.db import transaction, models
 from rest_framework import serializers
 from offers_app.models import Offer, OfferDetail
 from user_auth_app.api.serializers import UserSerializer
@@ -6,6 +6,7 @@ from user_auth_app.api.serializers import UserSerializer
 
 
 class OfferDetailSerializer(serializers.ModelSerializer):
+    price = serializers.DecimalField(max_digits=10, decimal_places=2, coerce_to_string=False)
     class Meta:
         model = OfferDetail
         fields = ['id', 'title', 'revisions', 'delivery_time_in_days', 'price', 'features', 'offer_type']
@@ -14,6 +15,8 @@ class OfferSerializer(serializers.ModelSerializer):
     details = OfferDetailSerializer(many=True)
     user_details = UserSerializer(source='user', read_only=True)
     user = serializers.PrimaryKeyRelatedField(read_only=True)
+    min_price = serializers.DecimalField(read_only=True, max_digits=10, decimal_places=2)
+    min_delivery_time = serializers.IntegerField(read_only=True)
     class Meta:
         model = Offer
         fields = ['id', 'user', 'title', 'image', 'description', 'created_at', 'updated_at', 'details', 'min_price', 'min_delivery_time', 'user_details']
@@ -47,6 +50,13 @@ class OfferSerializer(serializers.ModelSerializer):
             offer = Offer.objects.create(**validated_data)
             for detail_data in details_data:
                 OfferDetail.objects.create(offer=offer, **detail_data)
+            agg = offer.details.aggregate(
+                min_price=models.Min('price'),
+                min_delivery_time=models.Min('delivery_time_in_days')
+            )
+            offer.min_price = agg['min_price']
+            offer.min_delivery_time = agg['min_delivery_time']
+            offer.save(update_fields=['min_price', 'min_delivery_time'])
             return offer
     
     def update(self, instance, validated_data):
@@ -67,4 +77,12 @@ class OfferSerializer(serializers.ModelSerializer):
                             raise serializers.ValidationError(
                                 f"Detail mit Typ {offer_type} existiert nicht"
                             )
+                agg = instance.details.aggregate(
+                    min_price=models.Min('price'),
+                    min_delivery_time=models.Min('delivery_time_in_days')
+                )
+                instance.min_price = agg['min_price']
+                instance.min_delivery_time = agg['min_delivery_time']
+                instance.save(update_fields=['min_price', 'min_delivery_time'])
                 return instance
+   

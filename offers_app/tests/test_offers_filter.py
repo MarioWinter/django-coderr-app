@@ -15,7 +15,6 @@ class OffersAppFilterTest(APITestCase):
         self.client = APIClient(enforce_csrf_checks=True)
         self.client.credentials(HTTP_AUTHORIZATION='Token ' + self.token.key)
         self.offer_data = {
-            "user": self.user.id,
             "title": "Webdesign Paket",
             "description": "Professionelle Webentwicklung",
             "details": [
@@ -47,24 +46,50 @@ class OffersAppFilterTest(APITestCase):
         }
         url = reverse('offers-list')
         response = self.client.post(url, self.offer_data, format='json')
-        self.offer = Offer.objects.get(id=response.data['id'])
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
     
     def test_get_offers_list_with_filters(self):
         """Tests GET /offers/ with various filters and search parameters"""
-        # Offer.objects.create(
-        #     user=self.other_user,
-        #     title="SEO Service",
-        #     description="Search engine optimization",
-        #     min_price=300,
-        #     min_delivery_time=5
-        # )
-
+        self.offer_data = {
+            "title": "UI Design Paket",
+            "description": "Professionelle UI Design",
+            "details": [
+                {
+                    "title": "Basic",
+                    "revisions": 5,
+                    "delivery_time_in_days": 6,
+                    "price": 500.00,
+                    "features": ["Responsive Design"],
+                    "offer_type": "basic"
+                },
+                {
+                    "title": "Standard",
+                    "revisions": 7,
+                    "delivery_time_in_days": 8,
+                    "price": 700.00,
+                    "features": ["CMS Integration"],
+                    "offer_type": "standard"
+                },
+                {
+                    "title": "Premium",
+                    "revisions": -1,
+                    "delivery_time_in_days": 3,
+                    "price": 2000.00,
+                    "features": ["SEO Optimierung"],
+                    "offer_type": "premium"
+                }
+            ]
+        }
+        url = reverse('offers-list')
+        response = self.client.post(url, self.offer_data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         test_cases = [
-            ('creator_id filter', {'creator_id': self.user.id}, 1),
-            ('min_price filter', {'min_price': 200}, 1),
-            ('max_delivery_time filter', {'max_delivery_time': 5}, 1),
+            ('creator_id filter', {'creator_id': self.user.id}, 2),
+            ('min_price filter', {'min_price': 200}, 2),
+            ('max_delivery_time filter', {'max_delivery_time': 5}, 2),
             ('search filter', {'search': 'Webdesign'}, 1),
-            ('ordering', {'ordering': 'min_price'}, 2)
+            ('min_price ordering', {'ordering': '-min_price'}, 2),
+            ('min_delivery_time ordering', {'ordering': 'min_delivery_time'}, 2),
         ]
 
         for desc, params, expected_count in test_cases:

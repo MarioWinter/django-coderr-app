@@ -15,7 +15,6 @@ class OffersAppTest(APITestCase):
         self.client = APIClient(enforce_csrf_checks=True)
         self.client.credentials(HTTP_AUTHORIZATION='Token ' + self.token.key)
         self.offer_data = {
-            #"user": self.user.id,
             "title": "Webdesign Paket",
             "description": "Professionelle Webentwicklung",
             "details": [
@@ -48,14 +47,11 @@ class OffersAppTest(APITestCase):
         url = reverse('offers-list')
         response = self.client.post(url, self.offer_data, format='json')
         self.offer = Offer.objects.get(id=response.data['id'])
-
-        
         
     def test_list_create_offers(self):
         """Tests POST /offers/ endpoint for creating a new offer with three required details."""
         url = reverse('offers-list')
         data = {
-            "user": self.user.id,
             "title": "Grafikdesign-Paket",
             "description": "Ein umfassendes Grafikdesign-Paket für Unternehmen.",
             "details": [

@@ -9,20 +9,14 @@ class Offer(models.Model):
     description = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    min_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    min_delivery_time = models.PositiveIntegerField(validators=[MinValueValidator(1)],null=True, blank=True)
     
     class Meta:
         ordering = ['-updated_at']
     
     def __str__(self):
         return self.title
-    
-    @property
-    def min_price(self):
-        return self.details.aggregate(models.Min('price'))['price__min']
-
-    @property
-    def min_delivery_time(self):
-        return self.details.aggregate(models.Min('delivery_time_in_days'))['delivery_time_in_days__min']
 
 class OfferDetail(models.Model):
     class OfferType(models.TextChoices):
