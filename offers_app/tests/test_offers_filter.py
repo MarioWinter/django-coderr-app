@@ -24,7 +24,6 @@ class OffersAppFilterTest(APITestCase):
         self.client = APIClient()
         self.client.credentials(HTTP_AUTHORIZATION='Token ' + self.token.key)
 
-        # Create test offers
         self.create_offer(
             user=self.user,
             title="Webdesign Paket",
