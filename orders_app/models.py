@@ -8,7 +8,7 @@ class Order(models.Model):
         BASIC = 'basic', 'basic'
         STANDARD = 'standard', 'standard'
         PREMIUM = 'premium', 'premium'
-    offer_detail_id = models.ForeignKey(OfferDetail, on_delete=models.PROTECT, related_name="order_offer_detail", null=True)
+    offer_detail_id = models.ForeignKey(OfferDetail, on_delete=models.PROTECT, related_name="offer_detail_id", null=True)
     customer_user = models.ForeignKey(User, on_delete=models.CASCADE,related_name="customer_user")
     busines_user = models.PositiveIntegerField(validators=[MinValueValidator(1)], null=True, blank=True)
     title = models.CharField(max_length=255, blank=True, null=True)
