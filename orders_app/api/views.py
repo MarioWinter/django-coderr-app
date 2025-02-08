@@ -6,7 +6,7 @@ from .permissions import CustomerPermission
 from orders_app.models import Order
 from .serializers import OrderSerializer
 
-class ContactViewSet(viewsets.ModelViewSet):
+class OrderViewSet(viewsets.ModelViewSet):
     queryset = Order.objects.all()
     serializer_class = OrderSerializer
     permission_classes = [CustomerPermission]
