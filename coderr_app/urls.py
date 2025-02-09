@@ -26,6 +26,7 @@ urlpatterns = [
     path('api/', redirect_to_schema, name='root'),
     path('api/', include('user_auth_app.api.urls')),
     path('api/', include('offers_app.api.urls')),
+    path('api/', include('orders_app.api.urls')),
     path('api-auth', include('rest_framework.urls')),
     
     ## API Schema & Doku

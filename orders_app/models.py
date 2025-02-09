@@ -10,14 +10,14 @@ class Order(models.Model):
         PREMIUM = 'premium', 'premium'
     offer_detail_id = models.ForeignKey(OfferDetail, on_delete=models.PROTECT, related_name="offer_detail_id", null=True)
     customer_user = models.ForeignKey(User, on_delete=models.CASCADE,related_name="customer_user")
-    busines_user = models.PositiveIntegerField(validators=[MinValueValidator(1)], null=True, blank=True)
+    business_user = models.PositiveIntegerField(validators=[MinValueValidator(1)], null=True, blank=True)
     title = models.CharField(max_length=255, blank=True, null=True)
     revisions = models.IntegerField(validators=[MinValueValidator(-1)], default=-1, blank=True, null=True)
     delivery_time_in_days = models.PositiveIntegerField(blank=True, null=True)
     price = models.DecimalField(max_digits=10, decimal_places=2,blank=True, null=True)
     features = models.JSONField(default=list, blank=True, null=True)
     offer_type = models.CharField(max_length=10, choices=OfferType.choices, default=OfferType.BASIC, blank=True, null=True)
-    status = models.CharField(max_length=255, blank=True, null=True)
+    status = models.CharField(default='in_progress',max_length=255, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     

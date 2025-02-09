@@ -12,5 +12,6 @@ class CustomerPermission(permissions.BasePermission):
         return bool(
             request.user and 
             request.user.is_authenticated and
-            request.user.user_type == 'customer'
+            hasattr(request.user, 'profile') and
+            request.user.profile.type == 'customer'
         )
