@@ -58,22 +58,27 @@ class OrderAppTest(APITestCase):
         url = reverse('offers-list')
         response = self.client.post(url, self.offer_data, format='json')
         self.offer = Offer.objects.get(id=response.data['id'])
+        response = self.client.post(reverse('orders-list'), {"offer_detail_id": 1}, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
     
     def test_list_create_order(self):
-        """Tests POST /offers/ endpoint for creating a new offer with three required details."""
+        """Tests POST /orders/ endpoint for creating a new order based on a offers details."""
         url = reverse('orders-list')
-        data = {
-            "offer_detail_id": 1,
-            
-            }
-            
-        
+        data = {"offer_detail_id": 2}
         response = self.client.post(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        print(response.data)
         # self.assertEqual(Offer.objects.count(), 2)
         # new_offer = Offer.objects.get(title='Grafikdesign-Paket')
         # self.assertEqual(new_offer.description, 'Ein umfassendes Grafikdesign-Paket für Unternehmen.')
         # all_details = new_offer.details.all()
         # self.assertEqual(len(all_details), 3, "There should be exactly three detail objects")
         # self.assertEqual(new_offer.user, self.user)
+    
+    def test_get_offers_list(self):
+        """GET /orders/ should return all orders"""
+        url = reverse('orders-list')
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        # self.assertEqual(Offer.objects.count(), 1)
+        # self.assertEqual(OfferDetail.objects.count(), 3)
+        # self.assertEqual(len(response.data), 4)
