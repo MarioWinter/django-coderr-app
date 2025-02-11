@@ -63,7 +63,7 @@ class OrderAppTest(APITestCase):
         self.assertEqual(response_order.status_code, status.HTTP_201_CREATED)
         self.order = Order.objects.get(id=response_order.data['id'])
     
-    def test_list_create_order(self):
+    def test_create_order_list(self):
         """Tests POST /orders/ endpoint for creating a new order based on a offers details."""
         url = reverse('orders-list')
         data = {"offer_detail_id": 2}
@@ -73,7 +73,7 @@ class OrderAppTest(APITestCase):
         new_order = Order.objects.get(title='Standard')
         self.assertEqual(new_order.revisions, 5)
     
-    def test_get_offers_list(self):
+    def test_get_order_list(self):
         """GET /orders/ should return all orders"""
         url = reverse('orders-list')
         response = self.client.get(url)
@@ -87,3 +87,16 @@ class OrderAppTest(APITestCase):
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['title'], self.offer_data['details'][0]['title'])
+    
+    def test_patch_order_status(self):
+        """PATCH /orders/{id}/ should update order status"""
+        url = reverse('orders-detail', kwargs={'pk': self.order.id})
+        data = {
+            'status':'completed'
+            }
+        response = self.client.patch(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.order.refresh_from_db()
+        self.assertEqual(self.order.status, 'completed')
+        
+    
