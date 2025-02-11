@@ -5,6 +5,7 @@ from rest_framework.authtoken.models import Token
 from django.contrib.auth import get_user_model
 
 from offers_app.models import Offer
+from orders_app.models import Order
 from user_auth_app.models import UserProfile
 
 User = get_user_model()
@@ -67,18 +68,14 @@ class OrderAppTest(APITestCase):
         data = {"offer_detail_id": 2}
         response = self.client.post(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        # self.assertEqual(Offer.objects.count(), 2)
-        # new_offer = Offer.objects.get(title='Grafikdesign-Paket')
-        # self.assertEqual(new_offer.description, 'Ein umfassendes Grafikdesign-Paket für Unternehmen.')
-        # all_details = new_offer.details.all()
-        # self.assertEqual(len(all_details), 3, "There should be exactly three detail objects")
-        # self.assertEqual(new_offer.user, self.user)
+        self.assertEqual(Order.objects.count(), 2)
+        new_order = Order.objects.get(title='Standard')
+        self.assertEqual(new_order.revisions, 5)
     
     def test_get_offers_list(self):
         """GET /orders/ should return all orders"""
         url = reverse('orders-list')
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        # self.assertEqual(Offer.objects.count(), 1)
-        # self.assertEqual(OfferDetail.objects.count(), 3)
-        # self.assertEqual(len(response.data), 4)
+        self.assertEqual(Order.objects.count(), 1)
+        self.assertEqual(len(response.data), 1)
