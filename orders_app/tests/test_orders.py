@@ -57,10 +57,11 @@ class OrderAppTest(APITestCase):
             ]
         }
         url = reverse('offers-list')
-        response = self.client.post(url, self.offer_data, format='json')
-        self.offer = Offer.objects.get(id=response.data['id'])
-        response = self.client.post(reverse('orders-list'), {"offer_detail_id": 1}, format='json')
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        response_offer = self.client.post(url, self.offer_data, format='json')
+        self.offer = Offer.objects.get(id=response_offer.data['id'])
+        response_order = self.client.post(reverse('orders-list'), {"offer_detail_id": 1}, format='json')
+        self.assertEqual(response_order.status_code, status.HTTP_201_CREATED)
+        self.order = Order.objects.get(id=response_order.data['id'])
     
     def test_list_create_order(self):
         """Tests POST /orders/ endpoint for creating a new order based on a offers details."""
@@ -79,3 +80,10 @@ class OrderAppTest(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(Order.objects.count(), 1)
         self.assertEqual(len(response.data), 1)
+        
+    def test_get_single_order(self):
+        """GET /orders/{id}/ should return order details"""
+        url = reverse('orders-detail', kwargs={'pk': self.order.id})
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['title'], self.offer_data['details'][0]['title'])
