@@ -99,4 +99,11 @@ class OrderAppTest(APITestCase):
         self.order.refresh_from_db()
         self.assertEqual(self.order.status, 'completed')
         
+    def test_delete_offer_unauthorized(self):
+        """DELETE /order/{id}/ should delete order"""
+        url = reverse('orders-detail', kwargs={'pk': self.order.id})
+        response = self.client.delete(url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+        
     
