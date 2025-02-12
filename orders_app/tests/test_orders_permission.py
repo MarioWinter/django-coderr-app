@@ -83,7 +83,26 @@ class OrderPermissionTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
     
     def test_unauthenticated_user_update_order(self):
-        """Test unauthenticated user cannot update offers"""
-        url = reverse('orders-detail', kwargs={'pk': self.offer.id})
+        """Test unauthenticated user cannot update orders"""
+        url = reverse('orders-detail', kwargs={'pk': self.order.id})
         response = self.client.patch(url, {'status':'completed'})
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+    
+    def test_unauthenticated_user_read_order(self):
+        """Test unauthenticated user can read orders"""
+        url = reverse('orders-detail', kwargs={'pk': self.order.id})
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+        
+    def test_non_owner_read_orders(self):
+        """Test non-owner cannot read order from other users"""
+        self.client.force_authenticate(user=self.other_user)
+        response = self.client.get(reverse('orders-list'))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data, [])
+    
+    def test_non_owner_read_order(self):
+        """Test non-owner cannot read an order of another user"""
+        self.client.force_authenticate(user=self.other_user)
+        response = self.client.get(reverse('orders-detail', kwargs={'pk': self.order.id}))
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)

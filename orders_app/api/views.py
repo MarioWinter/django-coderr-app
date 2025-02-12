@@ -7,9 +7,11 @@ from orders_app.models import Order
 from .serializers import OrderSerializer
 
 class OrderViewSet(viewsets.ModelViewSet):
-    queryset = Order.objects.all()
     serializer_class = OrderSerializer
     permission_classes = [OrderPermission, CustomerPermission]
+    
+    def get_queryset(self):
+        return Order.objects.filter(customer_user=self.request.user)
     
     def perform_create(self, serializer):
         serializer.save(customer_user=self.request.user)
