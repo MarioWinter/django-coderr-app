@@ -91,9 +91,7 @@ class OrderAppTest(APITestCase):
     def test_patch_order_status(self):
         """PATCH /orders/{id}/ should update order status"""
         url = reverse('orders-detail', kwargs={'pk': self.order.id})
-        data = {
-            'status':'completed'
-            }
+        data = {'status':'completed'}
         response = self.client.patch(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.order.refresh_from_db()
