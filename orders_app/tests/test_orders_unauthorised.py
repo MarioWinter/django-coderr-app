@@ -10,7 +10,7 @@ from user_auth_app.models import UserProfile
 
 User = get_user_model()
 
-class OrderPermissionTests(APITestCase):
+class OrderUnauthorisedTests(APITestCase):
     def setUp(self):
         """Initialize test users and create sample order"""
         self.owner = User.objects.create_user(
@@ -105,4 +105,11 @@ class OrderPermissionTests(APITestCase):
         """Test non-owner cannot read an order of another user"""
         self.client.force_authenticate(user=self.other_user)
         response = self.client.get(reverse('orders-detail', kwargs={'pk': self.order.id}))
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+    
+    def test_non_owner_update_order(self):
+        """Test non-owner cannot update order"""
+        self.client.force_authenticate(user=self.other_user)
+        url = reverse('orders-detail', kwargs={'pk': self.order.id})
+        response = self.client.patch(url, {'status': 'completed'})
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
