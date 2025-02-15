@@ -89,7 +89,7 @@ class OrderUnauthorisedTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
     
     def test_unauthenticated_user_read_order(self):
-        """Test unauthenticated user can read orders"""
+        """Test unauthenticated user cannot read order"""
         url = reverse('orders-detail', kwargs={'pk': self.order.id})
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
