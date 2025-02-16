@@ -35,7 +35,7 @@ class OrderCountViewsTest(APITestCase):
         )
         Order.objects.create(
             business_user=self.business_user.id,
-            status='in_progress',
+            status='completed',
             offer_detail_id=None,
             customer_user=self.business_user
         )
@@ -53,7 +53,7 @@ class OrderCountViewsTest(APITestCase):
         )
         Order.objects.create(
             business_user=self.business_user.id,
-            status='completed',
+            status='in_progress',
             offer_detail_id=None,
             customer_user=self.business_user
         )
@@ -127,3 +127,12 @@ class OrderCountViewsTest(APITestCase):
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data.get('completed_order_count'), 0)
+
+    def test_completed_order_count_view_invalid_user(self):
+        """
+        Test that 'completed-order-count' returns a 404 error for a non-existent user.
+        """
+        url = reverse('completed-order-count', args=[9999])
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertIn('error', response.data)
