@@ -93,3 +93,16 @@ class OrderCountViewsTest(APITestCase):
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data.get('completed_order_count'), 2)
+    
+    def test_completed_order_count_view_no_orders(self):
+        """
+        Test that 'completed-order-count' returns 0 for a business user with no orders.
+        """
+        new_business = User.objects.create_user(
+            username='new_business', email='newbusiness@example.com', password='password123'
+        )
+        UserProfile.objects.create(user=new_business, type='business')
+        url = reverse('completed-order-count', args=[new_business.id])
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data.get('completed_order_count'), 0)
