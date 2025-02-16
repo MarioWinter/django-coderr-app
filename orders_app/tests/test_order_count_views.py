@@ -66,3 +66,12 @@ class OrderCountViewsTest(APITestCase):
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data.get('order_count'), 3)
+    
+    def test_order_count_view_invalid_user(self):
+        """
+        Test that the OrderCountView returns a 404 status for a non-existing business user.
+        """
+        url = reverse('order-count', args=[9999])
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertIn('error', response.data)
