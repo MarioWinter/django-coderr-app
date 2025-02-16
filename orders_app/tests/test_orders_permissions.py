@@ -12,7 +12,6 @@ User = get_user_model()
 
 class OrderAppPermissionsTest(APITestCase):
     def setUp(self):
-        # Create a minimal Offer and OfferDetail for testing order creation.
         self.offer_owner = User.objects.create_user(
             username="offerowner", password="offerpass", email="offerowner@example.com"
         )
@@ -32,7 +31,6 @@ class OrderAppPermissionsTest(APITestCase):
         )
         self.offer_detail_id = self.offer_detail.id
 
-        # Create a user with a customer profile.
         self.customer_user = User.objects.create_user(
             username="customer", password="custpass", email="customer@example.com"
         )
@@ -43,11 +41,10 @@ class OrderAppPermissionsTest(APITestCase):
             tel="123456789",
             description="Customer profile",
             working_hours="9-5",
-            type="customer"  # Customer profile type.
+            type="customer"
         )
         self.customer_token = Token.objects.create(user=self.customer_user)
 
-        # Create a user with a business profile.
         self.business_user = User.objects.create_user(
             username="business", password="bizpass", email="business@example.com"
         )
@@ -58,11 +55,11 @@ class OrderAppPermissionsTest(APITestCase):
             tel="987654321",
             description="Business profile",
             working_hours="9-5",
-            type="business"  # Business profile type.
+            type="business"
         )
         self.business_token = Token.objects.create(user=self.business_user)
-
-        # Create a user without any profile.
+        
+        
         self.no_profile_user = User.objects.create_user(
             username="noprofile", password="nppass", email="noprofile@example.com"
         )
@@ -75,7 +72,6 @@ class OrderAppPermissionsTest(APITestCase):
         data = {"offer_detail_id": self.offer_detail_id}
         response = self.client.post(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        # Verify that the order's fields are populated from the offer detail.
         self.assertEqual(response.data['title'], self.offer_detail.title)
 
     def test_business_cannot_create_order(self):
