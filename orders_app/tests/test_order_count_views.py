@@ -106,3 +106,24 @@ class OrderCountViewsTest(APITestCase):
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data.get('completed_order_count'), 0)
+    
+    def test_completed_order_count_view_no_completed_orders(self):
+        """
+        Test that 'completed-order-count' returns 0 when there are only in-progress orders.
+        """
+        new_business = User.objects.create_user(
+            username='inprogress_only', email='inprogress@example.com', password='password123'
+        )
+        UserProfile.objects.create(user=new_business, type='business')
+        Order.objects.create(
+            business_user=new_business.id, status='in_progress',
+            offer_detail_id=None, customer_user=new_business
+        )
+        Order.objects.create(
+            business_user=new_business.id, status='in_progress',
+            offer_detail_id=None, customer_user=new_business
+        )
+        url = reverse('completed-order-count', args=[new_business.id])
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data.get('completed_order_count'), 0)
