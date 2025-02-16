@@ -136,3 +136,12 @@ class OrderCountViewsTest(APITestCase):
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
         self.assertIn('error', response.data)
+        
+    def test_completed_order_count_view_non_business_profile(self):
+        """
+        Test that 'completed-order-count' returns a 404 error when the user is not a business user.
+        """
+        url = reverse('completed-order-count', args=[self.customer_user.id])
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertIn('error', response.data)
