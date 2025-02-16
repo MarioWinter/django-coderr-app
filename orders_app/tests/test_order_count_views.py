@@ -84,3 +84,12 @@ class OrderCountViewsTest(APITestCase):
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
         self.assertIn('error', response.data)
+        
+    def test_completed_order_count_view_success(self):
+        """
+        Test that the CompletedOrderCountView returns the correct count of completed orders.
+        """
+        url = reverse('completed-order-count', args=[self.business_user.id])
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data.get('completed_order_count'), 2)
