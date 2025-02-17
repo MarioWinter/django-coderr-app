@@ -12,6 +12,11 @@ from .serializers import OrderSerializer
 User = get_user_model()
 
 class OrderViewSet(viewsets.ModelViewSet):
+    """
+    ViewSet for managing orders.
+    Provides standard CRUD operations on Order objects filtered by the current authenticated customer.
+    Automatically assigns the current user as the customer when creating new orders.
+    """
     serializer_class = OrderSerializer
     permission_classes = [OrderPermission, CustomerPermission]
     
