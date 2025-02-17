@@ -1,8 +1,11 @@
 from django.db import transaction, models
 from rest_framework import serializers
+from django.contrib.auth import get_user_model
 
-from orders_app.models import Order
+from orders_app.models import Order, Review
 from offers_app.models import OfferDetail
+
+User = get_user_model()
 
 class OrderSerializer(serializers.ModelSerializer):
     offer_detail_id = serializers.PrimaryKeyRelatedField(queryset=OfferDetail.objects.all(), write_only=True)
@@ -26,3 +29,31 @@ class OrderSerializer(serializers.ModelSerializer):
         })
         return super().create(validated_data)
     
+class ReviewSerializer(serializers.ModelSerializer):
+    reviewer = serializers.PrimaryKeyRelatedField(read_only=True)
+    business_user = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
+
+    class Meta:
+        model = Review
+        fields = ['id', 'business_user', 'reviewer', 'rating', 'description', 'created_at', 'updated_at']
+        read_only_fields = ['id', 'reviewer', 'created_at', 'updated_at']
+
+    def validate(self, data):
+        """
+        Ensure that the current user has not already submitted a review for the specified business user.
+        """
+        request = self.context.get('request')
+        if request and request.method == 'POST':
+            reviewer = request.user
+            business_user = data.get('business_user')
+            if Review.objects.filter(reviewer=reviewer, business_user=business_user).exists():
+                raise serializers.ValidationError("You have already submitted a review for this business user.")
+        return data
+
+    def create(self, validated_data):
+        """
+        Automatically assign the current user as the reviewer.
+        """
+        reviewer = self.context['request'].user
+        validated_data['reviewer'] = reviewer
+        return super().create(validated_data)
