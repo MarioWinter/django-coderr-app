@@ -23,4 +23,31 @@ class Order(models.Model):
     
     def __str__(self):
         return f"id: {self.id}, title: {self.title}, customer_user: {self.customer_user}, busines_user: {self.busines_user},  offer_type: {self.offer_type}"
+
+class Review(models.Model):
+    """
+    Model representing a review with a rating between 0 and 5.
+    Each review is linked to a business user and a reviewer (customer).
+    A reviewer can only submit one review per business user.
+    """
+    business_user = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name='business_reviews'
+    )
+    reviewer = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name='reviews'
+    )
+    rating = models.DecimalField(
+        max_digits=3, decimal_places=1, validators=[MinValueValidator(0)], default=0.0
+    )
+    description = models.TextField(blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = ('business_user', 'reviewer')
+        ordering = ['-updated_at']
+
+    def __str__(self):
+        return f"Review by {self.reviewer.username} for {self.business_user.id}: {self.rating}"
+
     
