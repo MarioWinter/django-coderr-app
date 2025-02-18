@@ -1,13 +1,15 @@
 from rest_framework import viewsets, status
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.filters import OrderingFilter, SearchFilter
+
 from django_filters.rest_framework import DjangoFilterBackend
 from django.contrib.auth import get_user_model
-from rest_framework.filters import OrderingFilter, SearchFilter
-from .permissions import OrderPermission, CustomerPermission, IsReviewerOrAdmin
 
 from orders_app.models import Order, Review
 from .serializers import OrderSerializer, ReviewSerializer
+from .permissions import OrderPermission, CustomerPermission, IsReviewerOrAdmin
 
 User = get_user_model()
 
@@ -91,9 +93,9 @@ class ReviewViewSet(viewsets.ModelViewSet):
     
     def get_permissions(self):
         if self.request.method == 'POST':
-            from rest_framework.permissions import IsAuthenticated, AllowAny
+            #from rest_framework.permissions import IsAuthenticated, AllowAny
             return [IsAuthenticated(), CustomerPermission()]
         elif self.request.method in ['PATCH', 'DELETE']:
-            from rest_framework.permissions import IsAuthenticated
+            #from rest_framework.permissions import IsAuthenticated
             return [IsAuthenticated(), IsReviewerOrAdmin()]
         return [AllowAny()]
