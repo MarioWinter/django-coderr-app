@@ -29,3 +29,10 @@ class OrderPermission(BasePermission):
         if request.method == 'DELETE':
             return request.user.is_superuser
         return request.user == obj.customer_user
+
+class IsReviewerOrAdmin(BasePermission):
+    """
+    Allows access only to the review's creator (reviewer) or an admin.
+    """
+    def has_object_permission(self, request, view, obj):
+        return request.user == obj.reviewer or request.user.is_superuser
