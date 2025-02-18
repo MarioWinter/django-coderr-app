@@ -4,10 +4,10 @@ from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
 from django.contrib.auth import get_user_model
 from rest_framework.filters import OrderingFilter, SearchFilter
-from .permissions import OrderPermission, CustomerPermission
+from .permissions import OrderPermission, CustomerPermission, IsReviewerOrAdmin
 
-from orders_app.models import Order
-from .serializers import OrderSerializer
+from orders_app.models import Order, Review
+from .serializers import OrderSerializer, ReviewSerializer
 
 User = get_user_model()
 
@@ -72,3 +72,28 @@ class CompletedOrderCountView(APIView):
         
         completed_order_count = Order.objects.filter(business_user=business_user_id, status='completed').count()
         return Response({'completed_order_count': completed_order_count})
+
+class ReviewViewSet(viewsets.ModelViewSet):
+    """
+    ViewSet for managing reviews.
+    
+    Provides list, create, retrieve, update, and delete operations.
+    
+    GET: Accessible to everyone.
+    POST: Only authenticated users with a customer profile can create reviews. A user may only submit one review per business user.
+    PATCH, DELETE: Only the review's creator (reviewer) or an admin may modify or delete a review.
+    """
+    queryset = Review.objects.all()
+    serializer_class = ReviewSerializer
+    filter_backends = [DjangoFilterBackend, OrderingFilter]
+    filterset_fields = ['business_user', 'reviewer']
+    ordering_fields = ['rating', 'updated_at']
+    
+    def get_permissions(self):
+        if self.request.method == 'POST':
+            from rest_framework.permissions import IsAuthenticated, AllowAny
+            return [IsAuthenticated(), CustomerPermission()]
+        elif self.request.method in ['PATCH', 'DELETE']:
+            from rest_framework.permissions import IsAuthenticated
+            return [IsAuthenticated(), IsReviewerOrAdmin()]
+        return [AllowAny()]
