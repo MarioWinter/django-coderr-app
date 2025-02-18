@@ -18,36 +18,50 @@ class ReviewEndpointTests(APITestCase):
         """
         Set up test users, tokens, and an initial review.
         """
-        # Create a business user (target for reviews)
         self.business_user = User.objects.create_user(
             username='business_user', email='business@example.com', password='password123'
         )
         UserProfile.objects.create(user=self.business_user, type='business')
         
-        # Create a customer user (reviewer)
         self.customer_user = User.objects.create_user(
             username='customer_user', email='customer@example.com', password='password123'
         )
         UserProfile.objects.create(user=self.customer_user, type='customer')
         self.customer_token = Token.objects.create(user=self.customer_user)
         
-        # Create another customer for testing unauthorized modifications
         self.other_customer = User.objects.create_user(
             username='other_customer', email='other@example.com', password='password123'
         )
         UserProfile.objects.create(user=self.other_customer, type='customer')
         self.other_customer_token = Token.objects.create(user=self.other_customer)
         
-        # Create an admin user
         self.admin_user = User.objects.create_superuser(
             username='admin', email='admin@example.com', password='adminpass'
         )
         self.admin_token = Token.objects.create(user=self.admin_user)
         
-        # Create an initial review by customer_user for business_user
         self.review = Review.objects.create(
             business_user=self.business_user,
             reviewer=self.customer_user,
             rating=4.0,
             description="Good service."
         )
+    
+    def test_create_review_success(self):
+        """
+        Test that an authenticated customer (who hasn't already reviewed the business user)
+        can create a new review.
+        """
+        url = reverse('reviews-list')
+        data = {
+            'business_user': self.business_user.id,
+            'rating': 5.0,
+            'description': "Excellent service!"
+        }
+        # Use other_customer who has not yet reviewed the business user.
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + self.other_customer_token.key)
+        response = self.client.post(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(response.data['business_user'], self.business_user.id)
+        self.assertEqual(response.data['reviewer'], self.other_customer.id)
+        self.assertEqual(float(response.data['rating']), 5.0)
