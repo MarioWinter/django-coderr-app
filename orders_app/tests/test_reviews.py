@@ -58,10 +58,23 @@ class ReviewEndpointTests(APITestCase):
             'rating': 5.0,
             'description': "Excellent service!"
         }
-        # Use other_customer who has not yet reviewed the business user.
         self.client.credentials(HTTP_AUTHORIZATION='Token ' + self.other_customer_token.key)
         response = self.client.post(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(response.data['business_user'], self.business_user.id)
         self.assertEqual(response.data['reviewer'], self.other_customer.id)
         self.assertEqual(float(response.data['rating']), 5.0)
+    
+    def test_create_duplicate_review(self):
+        """
+        Test that a customer cannot submit more than one review per business user.
+        """
+        url = reverse('reviews-list')
+        data = {
+            'business_user': self.business_user.id,
+            'rating': 3.0,
+            'description': "Average service."
+        }
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + self.customer_token.key)
+        response = self.client.post(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
