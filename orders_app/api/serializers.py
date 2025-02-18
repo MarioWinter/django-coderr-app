@@ -32,6 +32,11 @@ class OrderSerializer(serializers.ModelSerializer):
 class ReviewSerializer(serializers.ModelSerializer):
     reviewer = serializers.PrimaryKeyRelatedField(read_only=True)
     business_user = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
+    rating = serializers.DecimalField(
+        max_digits=3,
+        decimal_places=1,
+        coerce_to_string=False
+    )
 
     class Meta:
         model = Review
