@@ -89,6 +89,23 @@ class ReviewEndpointTests(APITestCase):
             'rating': 4.0,
             'description': "Nice service."
         }
-        self.client.credentials()  # Remove authentication
+        self.client.credentials()
         response = self.client.post(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+    
+    def test_get_review_list(self):
+        """
+        Test retrieving the list of reviews with filtering and ordering.
+        """
+        url = reverse('reviews-list')
+        Review.objects.create(
+            business_user=self.business_user,
+            reviewer=self.other_customer,
+            rating=2.5,
+            description="Not so good."
+        )
+        response = self.client.get(url + f'?business_user={self.business_user.id}&ordering=-rating')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertGreaterEqual(len(response.data), 2)
+        ratings = [review['rating'] for review in response.data]
+        self.assertTrue(all(ratings[i] >= ratings[i+1] for i in range(len(ratings)-1)))
