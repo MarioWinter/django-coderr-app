@@ -174,3 +174,12 @@ class ReviewEndpointTests(APITestCase):
         response = self.client.delete(url)
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         self.assertFalse(Review.objects.filter(id=self.review.id).exists())
+    
+    def test_delete_review_by_non_reviewer(self):
+        """
+        Test that a customer who is not the review's creator cannot delete the review.
+        """
+        url = reverse('reviews-detail', kwargs={'pk': self.review.id})
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + self.other_customer_token.key)
+        response = self.client.delete(url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
