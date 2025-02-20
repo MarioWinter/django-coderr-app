@@ -119,3 +119,19 @@ class ReviewEndpointTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['id'], self.review.id)
         self.assertEqual(response.data['description'], "Good service.")
+    
+    def test_update_review_by_reviewer(self):
+        """
+        Test that the review's creator can update their review.
+        """
+        url = reverse('reviews-detail', kwargs={'pk': self.review.id})
+        data = {
+            'rating': 4.5,
+            'description': "Very good service."
+        }
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + self.customer_token.key)
+        response = self.client.patch(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.review.refresh_from_db()
+        self.assertEqual(float(self.review.rating), 4.5)
+        self.assertEqual(self.review.description, "Very good service.")
