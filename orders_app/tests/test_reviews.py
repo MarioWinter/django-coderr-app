@@ -109,3 +109,13 @@ class ReviewEndpointTests(APITestCase):
         self.assertGreaterEqual(len(response.data), 2)
         ratings = [review['rating'] for review in response.data]
         self.assertTrue(all(ratings[i] >= ratings[i+1] for i in range(len(ratings)-1)))
+        
+    def test_get_review_detail(self):
+        """
+        Test retrieving details of a single review.
+        """
+        url = reverse('reviews-detail', kwargs={'pk': self.review.id})
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['id'], self.review.id)
+        self.assertEqual(response.data['description'], "Good service.")
