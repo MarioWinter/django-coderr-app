@@ -148,3 +148,19 @@ class ReviewEndpointTests(APITestCase):
         self.client.credentials(HTTP_AUTHORIZATION='Token ' + self.other_customer_token.key)
         response = self.client.patch(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+    
+    def test_update_review_by_admin(self):
+        """
+        Test that an admin user can update any review.
+        """
+        url = reverse('reviews-detail', kwargs={'pk': self.review.id})
+        data = {
+            'rating': 5.0,
+            'description': "Admin updated review."
+        }
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + self.admin_token.key)
+        response = self.client.patch(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.review.refresh_from_db()
+        self.assertEqual(float(self.review.rating), 5.0)
+        self.assertEqual(self.review.description, "Admin updated review.")
