@@ -6,7 +6,10 @@ from rest_framework.filters import OrderingFilter, SearchFilter
 
 from django_filters.rest_framework import DjangoFilterBackend
 from django.contrib.auth import get_user_model
+from django.db.models import Avg
 
+from offers_app.models import Offer
+from user_auth_app.models import UserProfile
 from orders_app.models import Order, Review
 from .serializers import OrderSerializer, ReviewSerializer
 from .permissions import OrderPermission, CustomerPermission, IsReviewerOrAdmin
@@ -93,9 +96,37 @@ class ReviewViewSet(viewsets.ModelViewSet):
     
     def get_permissions(self):
         if self.request.method == 'POST':
-            #from rest_framework.permissions import IsAuthenticated, AllowAny
             return [IsAuthenticated(), CustomerPermission()]
         elif self.request.method in ['PATCH', 'DELETE']:
-            #from rest_framework.permissions import IsAuthenticated
             return [IsAuthenticated(), IsReviewerOrAdmin()]
         return [AllowAny()]
+
+class BaseInfoView(APIView):
+    """
+    Retrieve general platform statistics.
+    
+    GET /base-info/
+    
+    Returns:
+        JSON response with:
+          - review_count: Total number of reviews.
+          - average_rating: Average review score (rounded to one decimal).
+          - business_profile_count: Number of business profiles.
+          - offer_count: Total number of offers.
+    """
+    permission_classes = []
+
+    def get(self, request):
+        review_count = Review.objects.count()
+        avg_rating = Review.objects.aggregate(avg=Avg('rating'))['avg']
+        avg_rating = round(avg_rating, 1) if avg_rating is not None else 0.0
+        business_profile_count = UserProfile.objects.filter(type='business').count()
+        offer_count = Offer.objects.count()
+
+        data = {
+            'review_count': review_count,
+            'average_rating': avg_rating,
+            'business_profile_count': business_profile_count,
+            'offer_count': offer_count
+        }
+        return Response(data, status=status.HTTP_200_OK)
