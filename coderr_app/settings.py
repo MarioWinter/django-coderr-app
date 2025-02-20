@@ -11,9 +11,12 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
 from pathlib import Path
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+MEDIA_URL = '/media/'
 
 
 # Quick-start development settings - unsuitable for production
@@ -62,6 +65,7 @@ CSRF_TRUSTED_ORIGINS = [
   'http://localhost:5500',
   'http://192.168.2.103:5500',
   'http://192.168.1.57:5500',
+  'http://169.254.99.243:5500',
 
 
 ]
@@ -74,6 +78,7 @@ CORS_ALLOWED_ORIGINS = [
   'http://localhost:5500',
   'http://192.168.2.103:5500',
   'http://192.168.1.57:5500',
+  'http://169.254.99.243:5500',
 
 ]
 
