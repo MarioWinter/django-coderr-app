@@ -164,3 +164,13 @@ class ReviewEndpointTests(APITestCase):
         self.review.refresh_from_db()
         self.assertEqual(float(self.review.rating), 5.0)
         self.assertEqual(self.review.description, "Admin updated review.")
+    
+    def test_delete_review_by_reviewer(self):
+        """
+        Test that the review's creator can delete their review.
+        """
+        url = reverse('reviews-detail', kwargs={'pk': self.review.id})
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + self.customer_token.key)
+        response = self.client.delete(url)
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertFalse(Review.objects.filter(id=self.review.id).exists())
