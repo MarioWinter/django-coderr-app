@@ -135,3 +135,16 @@ class ReviewEndpointTests(APITestCase):
         self.review.refresh_from_db()
         self.assertEqual(float(self.review.rating), 4.5)
         self.assertEqual(self.review.description, "Very good service.")
+    
+    def test_update_review_by_non_reviewer(self):
+        """
+        Test that a customer who is not the review's creator cannot update the review.
+        """
+        url = reverse('reviews-detail', kwargs={'pk': self.review.id})
+        data = {
+            'rating': 3.0,
+            'description': "Changed review."
+        }
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + self.other_customer_token.key)
+        response = self.client.patch(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
