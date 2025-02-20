@@ -78,3 +78,17 @@ class ReviewEndpointTests(APITestCase):
         self.client.credentials(HTTP_AUTHORIZATION='Token ' + self.customer_token.key)
         response = self.client.post(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+    
+    def test_unauthenticated_cannot_create_review(self):
+        """
+        Test that an unauthenticated user cannot create a review.
+        """
+        url = reverse('reviews-list')
+        data = {
+            'business_user': self.business_user.id,
+            'rating': 4.0,
+            'description': "Nice service."
+        }
+        self.client.credentials()  # Remove authentication
+        response = self.client.post(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
