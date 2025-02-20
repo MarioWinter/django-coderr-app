@@ -183,3 +183,13 @@ class ReviewEndpointTests(APITestCase):
         self.client.credentials(HTTP_AUTHORIZATION='Token ' + self.other_customer_token.key)
         response = self.client.delete(url)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        
+    def test_filter_reviews_by_reviewer(self):
+        """
+        Test that reviews can be filtered by reviewer.
+        """
+        url = reverse('reviews-list')
+        response = self.client.get(url + f'?reviewer={self.customer_user.id}')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        for review in response.data:
+            self.assertEqual(review['reviewer'], self.customer_user.id)
