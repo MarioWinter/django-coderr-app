@@ -72,7 +72,7 @@ class UserAuthAppTest(APITestCase):
             'user':self.user.id,
             'username':'testcustomeruser',
             'email':'customer@gmail.com',
-            'file':'http://testserver/image.png',
+            'file':'http://testserver/media/image.png',
             'location':'Hamburg',
             'tel':'+49040123456',
             'description':'Test',
@@ -109,8 +109,6 @@ class UserAuthAppTest(APITestCase):
         self.assertEqual(len(response.data), 1)
         self.assertEqual(response.data[0]['type'], 'business')
         
-    #Permission Tests
-    
     #unauthorized user
     def test_login_user_unauthorized(self):
         client = APIClient()
