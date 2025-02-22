@@ -1,5 +1,6 @@
 from django.db import transaction, models
 from rest_framework import serializers
+from rest_framework.reverse import reverse
 from offers_app.models import Offer, OfferDetail
 from user_auth_app.api.serializers import UserSerializer
 
@@ -12,7 +13,7 @@ class OfferDetailSerializer(serializers.ModelSerializer):
         fields = ['id', 'title', 'revisions', 'delivery_time_in_days', 'price', 'features', 'offer_type']
 
 class OfferSerializer(serializers.ModelSerializer):
-    details = OfferDetailSerializer(many=True)
+    details = serializers.SerializerMethodField()
     user_details = UserSerializer(source='user', read_only=True)
     user = serializers.PrimaryKeyRelatedField(read_only=True)
     min_price = serializers.DecimalField(read_only=True, max_digits=10, decimal_places=2)
@@ -20,18 +21,23 @@ class OfferSerializer(serializers.ModelSerializer):
     class Meta:
         model = Offer
         fields = ['id', 'user', 'title', 'image', 'description', 'created_at', 'updated_at', 'details', 'min_price', 'min_delivery_time', 'user_details']
-
+        
+    def get_details(self, obj):
+            request = self.context.get('request')
+            return [
+                {
+                    'id': detail.id, 
+                    'url': reverse('offerdetails-detail', kwargs={'pk': detail.id}, request=request)
+                }
+                for detail in obj.details.all()
+            ]
     def validate_details(self, value):
-            
             if self.context['request'].method == 'POST':
                 if len(value) != 3:
                     raise serializers.ValidationError("Es sind 3 Angebotsdetails erforderlich.")
-                
                 types = {detail['offer_type'] for detail in value}
                 if types != {'basic', 'standard', 'premium'}:
                     raise serializers.ValidationError("Alle drei Typen müssen vorhanden sein.")
-            
-            
             else:
                 seen_types = set()
                 for detail in value:
@@ -61,10 +67,8 @@ class OfferSerializer(serializers.ModelSerializer):
     
     def update(self, instance, validated_data):
             details_data = validated_data.pop('details', None)
-            
             with transaction.atomic():
                 instance = super().update(instance, validated_data)
-                
                 if details_data is not None:
                     for detail_data in details_data:
                         offer_type = detail_data['offer_type']
