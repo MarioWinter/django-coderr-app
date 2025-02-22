@@ -104,7 +104,8 @@ class ReviewEndpointTests(APITestCase):
             rating=2.5,
             description="Not so good."
         )
-        response = self.client.get(url + f'?business_user={self.business_user.id}&ordering=-rating')
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + self.customer_token.key)
+        response = self.client.get(url + f'?business_user_id={self.business_user.id}&ordering=-rating')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertGreaterEqual(len(response.data), 2)
         ratings = [review['rating'] for review in response.data]
@@ -115,6 +116,7 @@ class ReviewEndpointTests(APITestCase):
         Test retrieving details of a single review.
         """
         url = reverse('reviews-detail', kwargs={'pk': self.review.id})
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + self.customer_token.key)
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['id'], self.review.id)
@@ -189,7 +191,8 @@ class ReviewEndpointTests(APITestCase):
         Test that reviews can be filtered by reviewer.
         """
         url = reverse('reviews-list')
-        response = self.client.get(url + f'?reviewer={self.customer_user.id}')
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + self.customer_token.key)
+        response = self.client.get(url + f'?reviewer_id={self.customer_user.id}')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         for review in response.data:
             self.assertEqual(review['reviewer'], self.customer_user.id)
