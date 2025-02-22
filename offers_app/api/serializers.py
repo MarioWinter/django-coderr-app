@@ -17,9 +17,12 @@ class OfferDetailSerializer(serializers.ModelSerializer):
 
 class OfferSerializer(serializers.ModelSerializer):
     """
-    Serializer for Offer model.
+    Serializer for the Offer model.
+    The field 'details' is used for both input and output.
+    On write operations, it accepts a list of detail objects.
+    On read operations, the output is transformed (z.B. to only show URLs).
     """
-    details = serializers.SerializerMethodField()
+    details = OfferDetailSerializer(many=True, write_only=True)
     user_details = UserSerializer(source='user', read_only=True)
     user = serializers.PrimaryKeyRelatedField(read_only=True)
     min_price = serializers.DecimalField(read_only=True, max_digits=10, decimal_places=2)
@@ -28,18 +31,22 @@ class OfferSerializer(serializers.ModelSerializer):
         model = Offer
         fields = ['id', 'user', 'title', 'image', 'description', 'created_at', 'updated_at', 'details', 'min_price', 'min_delivery_time', 'user_details']
         
-    def get_details(self, obj):
-        """
-        Returns a list of detail URLs for the given offer.
-        """
-        request = self.context.get('request')
-        return [
-            {
-                'id': detail.id, 
-                'url': reverse('offerdetails-detail', kwargs={'pk': detail.id}, request=request)
-            }
-            for detail in obj.details.all()
-        ]
+    def to_representation(self, instance):
+            """
+            Überschreibt die Ausgabe, um beim Lesen nur die URLs der Detailobjekte zurückzugeben.
+            """
+            representation = super().to_representation(instance)
+            request = self.context.get('request')
+            if request and request.method == 'GET':
+                representation['details'] = [
+                    {
+                        'id': detail.id,
+                        'url': reverse('offerdetails-detail', kwargs={'pk': detail.id}, request=request)
+                    }
+                    for detail in instance.details.all()
+                ]
+            return representation
+        
     def validate_details(self, value):
         """
         Validates that the details list contains exactly three unique offer types on POST requests.

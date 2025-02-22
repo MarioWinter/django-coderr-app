@@ -20,10 +20,10 @@ class OffersAppFilterTest(APITestCase):
             username='otheruser',
             password='otherpass'
         )
-        self.token = Token.objects.create(user=self.user)
         self.client = APIClient()
-        self.client.credentials(HTTP_AUTHORIZATION='Token ' + self.token.key)
-
+        
+        self.user_token = Token.objects.create(user=self.user)
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + self.user_token.key)
         self.create_offer(
             user=self.user,
             title="Webdesign Paket",
@@ -34,7 +34,9 @@ class OffersAppFilterTest(APITestCase):
                 {'price': 500, 'delivery': 3, 'type': 'premium'}
             ]
         )
-
+        
+        self.other_token = Token.objects.create(user=self.other_user)
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + self.other_token.key)
         self.create_offer(
             user=self.other_user,
             title="UI Design Paket",
@@ -45,7 +47,9 @@ class OffersAppFilterTest(APITestCase):
                 {'price': 700, 'delivery': 2, 'type': 'premium'}
             ]
         )
-
+        
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + self.user_token.key)
+        
     def create_offer(self, user, title, description, details):
         """Helper method to create offers with details"""
         offer_data = {
@@ -69,7 +73,7 @@ class OffersAppFilterTest(APITestCase):
         """Test filtering offers by creator ID"""
         response = self.client.get(reverse('offers-list'), {'creator_id': self.user.id})
         results = response.data['results']
-        self.assertEqual(len(results), 2)
+        self.assertEqual(len(results), 1)
         self.assertEqual(results[0]['user'], self.user.id)
 
     def test_min_price_filter(self):

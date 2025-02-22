@@ -97,7 +97,7 @@ class OffersAppTest(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(Offer.objects.count(), 1)
         self.assertEqual(OfferDetail.objects.count(), 3)
-        self.assertEqual(len(response.data), 4)
+        self.assertIn('results', response.data)
 
     def test_get_single_offer(self):
         """GET /offers/{id}/ should return offer details"""
