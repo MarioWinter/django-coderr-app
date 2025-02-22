@@ -3,6 +3,9 @@ from django.contrib.auth.models import User
 from django.core.validators import MinValueValidator
 
 class Offer(models.Model):
+    """
+    Represents an offer created by a user with aggregated details.
+    """
     user = models.ForeignKey(User, on_delete=models.CASCADE,related_name="offers")
     title = models.CharField(max_length=255)
     image = models.ImageField(upload_to='offers/images/', null=True, blank=True)
@@ -19,6 +22,9 @@ class Offer(models.Model):
         return self.title
 
 class OfferDetail(models.Model):
+    """
+    Represents detailed information about an offer.
+    """
     class OfferType(models.TextChoices):
         BASIC = 'basic', 'basic'
         STANDARD = 'standard', 'standard'
