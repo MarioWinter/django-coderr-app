@@ -17,6 +17,9 @@ class OrderSerializer(serializers.ModelSerializer):
         write_only_fields = ['offer_detail_id']
         
     def create(self, validated_data):
+        """
+        Create a new order by populating fields from the offer details.
+        """
         offer = validated_data.pop('offer_detail_id')
         validated_data.update({
             'title': offer.title,

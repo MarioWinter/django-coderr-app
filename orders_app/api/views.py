@@ -13,6 +13,7 @@ from user_auth_app.models import UserProfile
 from orders_app.models import Order, Review
 from .serializers import OrderSerializer, ReviewSerializer
 from .permissions import OrderPermission, CustomerPermission, IsReviewerOrAdmin
+from .filters import ReviewFilter
 
 User = get_user_model()
 
@@ -91,15 +92,20 @@ class ReviewViewSet(viewsets.ModelViewSet):
     queryset = Review.objects.all()
     serializer_class = ReviewSerializer
     filter_backends = [DjangoFilterBackend, OrderingFilter]
-    filterset_fields = ['business_user', 'reviewer']
+    filterset_class = ReviewFilter
     ordering_fields = ['rating', 'updated_at']
     
     def get_permissions(self):
-        if self.request.method == 'POST':
+        """
+        Return the list of permissions based on the request method.
+        """
+        if self.request.method == 'GET':
+            return [IsAuthenticated()]
+        elif self.request.method == 'POST':
             return [IsAuthenticated(), CustomerPermission()]
         elif self.request.method in ['PATCH', 'DELETE']:
             return [IsAuthenticated(), IsReviewerOrAdmin()]
-        return [AllowAny()]
+        return [IsAuthenticated()]
 
 class BaseInfoView(APIView):
     """
