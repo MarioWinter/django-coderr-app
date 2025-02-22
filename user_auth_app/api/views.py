@@ -48,6 +48,11 @@ class CustomLoginView(ObtainAuthToken):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class UserProfileDetail(generics.RetrieveUpdateDestroyAPIView):
+    """
+    Retrieve, update, or delete a user's profile.
+    GET requests are allowed for any authenticated user.
+    PATCH, PUT, DELETE requests require that the user is the owner or an admin.
+    """
     queryset = UserProfile.objects.all()
     serializer_class = UserProfileSerializer
     permission_classes = [ProfilePermission]
@@ -76,9 +81,9 @@ class UserProfileDetail(generics.RetrieveUpdateDestroyAPIView):
 class UserProfileBusinessList(generics.ListAPIView):
     queryset = UserProfile.objects.filter(type=UserProfile.UserType.BUSINESS)
     serializer_class = UserProfileBusinessSerializer
-    permission_classes = [ProfilePermission]
+    permission_classes = [IsAuthenticated]
     
 class UserProfileCustomerList(generics.ListAPIView):
     queryset = UserProfile.objects.filter(type=UserProfile.UserType.CUSTOMER)
     serializer_class = UserProfileCustomerSerializer
-    permission_classes = [ProfilePermission]
+    permission_classes = [IsAuthenticated]

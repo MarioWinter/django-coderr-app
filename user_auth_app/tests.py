@@ -10,7 +10,7 @@ User = get_user_model()
 
 class UserAuthAppTest(APITestCase):
     def setUp(self):
-        self.user = User.objects.create_user(username='testcustomeruser', password='werte12345', email='customer@gmail.com')
+        self.user = User.objects.create_user(username='testcustomeruser', first_name="Max", last_name="Mustermann", password='werte12345', email='customer@gmail.com')
         self.token = Token.objects.create(user=self.user)
         self.userprofile = UserProfile.objects.create(
             user=self.user,
@@ -71,13 +71,15 @@ class UserAuthAppTest(APITestCase):
         expected_data = {
             'user':self.user.id,
             'username':'testcustomeruser',
-            'email':'customer@gmail.com',
+            'first_name':'Max',
+            'last_name': 'Mustermann',
             'file':'http://testserver/media/image.png',
             'location':'Hamburg',
             'tel':'+49040123456',
             'description':'Test',
             'working_hours':'5',
             'type':'customer',
+            'email':'customer@gmail.com',
             'created_at':'2021-08-01T00:00:00Z'}
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data, expected_data)
@@ -85,15 +87,20 @@ class UserAuthAppTest(APITestCase):
     def test_patch_userprofile_detail(self):
         url = reverse('userprofile-detail', kwargs={'pk': self.user.id})
         data = {
-            'username':'customeruser',
-            'tel': '+49040123333',
+            "first_name": "Max",
+            "last_name": "Mustermann",
+            "location": "Berlin",
+            "tel": "987654321",
+            "description": "Updated business description",
+            "working_hours": "10-18",
+            "email": "newemail@business.de"
         }
         response = self.client.patch(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(UserProfile.objects.count(), 2)
         updated_profile = UserProfile.objects.get(user_id=self.user.id)
-        self.assertEqual(updated_profile.user.username, 'customeruser')
-        self.assertEqual(updated_profile.tel, '+49040123333')
+        self.assertEqual(updated_profile.user.email, 'newemail@business.de')
+        self.assertEqual(updated_profile.tel, '987654321')
     
     def test_get_userprofile_customer_list(self):
         url = reverse('userprofile-customer-list')

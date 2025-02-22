@@ -54,8 +54,8 @@ class UserSerializer(serializers.ModelSerializer):
 class UserProfileSerializer(serializers.ModelSerializer):
     user = serializers.IntegerField(source='user.id', read_only=True)
     username = serializers.CharField(source='user.username')
-    first_name = serializers.EmailField(source='user.first_name', read_only=True)
-    last_name = serializers.EmailField(source='user.last_name', read_only=True)
+    first_name = serializers.CharField(source='user.first_name')
+    last_name = serializers.CharField(source='user.last_name')
     email = serializers.EmailField(source='user.email')
     
     class Meta:
@@ -67,8 +67,8 @@ class UserProfileSerializer(serializers.ModelSerializer):
 class UserProfileBusinessSerializer(serializers.ModelSerializer):
     pk = serializers.IntegerField(source='user.id', read_only=True)
     username = serializers.CharField(source='user.username', read_only=True)
-    first_name = serializers.EmailField(source='user.first_name', read_only=True)
-    last_name = serializers.EmailField(source='user.last_name', read_only=True)
+    first_name = serializers.CharField(source='user.first_name', read_only=True)
+    last_name = serializers.CharField(source='user.last_name', read_only=True)
     
     class Meta:
         model = UserProfile
@@ -78,8 +78,8 @@ class UserProfileBusinessSerializer(serializers.ModelSerializer):
 class UserProfileCustomerSerializer(serializers.ModelSerializer):
     pk = serializers.IntegerField(source='user.id', read_only=True)
     username = serializers.CharField(source='user.username', read_only=True)
-    first_name = serializers.EmailField(source='user.first_name', read_only=True)
-    last_name = serializers.EmailField(source='user.last_name', read_only=True)
+    first_name = serializers.CharField(source='user.first_name', read_only=True)
+    last_name = serializers.CharField(source='user.last_name', read_only=True)
     
     class Meta:
         model = UserProfile
