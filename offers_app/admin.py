@@ -1,7 +1,6 @@
 from django.contrib import admin
 from offers_app.models import Offer, OfferDetail
 
-# Register your models here.
 class OfferDetailInline(admin.TabularInline):
     """
     Inline admin descriptor for OfferDetail model.
