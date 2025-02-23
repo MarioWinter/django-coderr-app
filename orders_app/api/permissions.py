@@ -28,7 +28,7 @@ class OrderPermission(BasePermission):
     def has_object_permission(self, request, view, obj):
         if request.method == 'DELETE':
             return request.user.is_superuser
-        return request.user == obj.customer_user
+        return request.user == obj.customer_user or request.user.id == obj.business_user
 
 class IsReviewerOrAdmin(BasePermission):
     """

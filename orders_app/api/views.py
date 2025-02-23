@@ -6,7 +6,7 @@ from rest_framework.filters import OrderingFilter, SearchFilter
 
 from django_filters.rest_framework import DjangoFilterBackend
 from django.contrib.auth import get_user_model
-from django.db.models import Avg
+from django.db.models import Avg, Q
 
 from offers_app.models import Offer
 from user_auth_app.models import UserProfile
@@ -27,7 +27,8 @@ class OrderViewSet(viewsets.ModelViewSet):
     permission_classes = [OrderPermission, CustomerPermission]
     
     def get_queryset(self):
-        return Order.objects.filter(customer_user=self.request.user)
+        user = self.request.user
+        return Order.objects.filter(Q(customer_user=user) | Q(business_user=user.id))
     
     def perform_create(self, serializer):
         serializer.save(customer_user=self.request.user)
