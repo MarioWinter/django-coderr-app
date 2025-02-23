@@ -28,7 +28,7 @@ class OrderSerializer(serializers.ModelSerializer):
             'price': offer.price,
             'features': offer.features,
             'offer_type': offer.offer_type,
-            'business_user': self.context['request'].user.id
+            'business_user': offer.offer.user.id
         })
         return super().create(validated_data)
     

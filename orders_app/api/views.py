@@ -51,7 +51,7 @@ class OrderCountView(APIView):
             if not hasattr(business_user, 'profile') or business_user.profile.type != 'business':
                 raise User.DoesNotExist
         except User.DoesNotExist:
-            return Response({'error': 'Business user not found.'}, status=status.HTTP_404_NOT_FOUND)
+            return Response({'error': 'Kein Geschäftsnutzer mit der angegebenen ID gefunden.'}, status=status.HTTP_404_NOT_FOUND)
         
         order_count = Order.objects.filter(business_user=business_user_id, status='in_progress').count()
         return Response({'order_count': order_count})
@@ -74,7 +74,7 @@ class CompletedOrderCountView(APIView):
             if not hasattr(business_user, 'profile') or business_user.profile.type != 'business':
                 raise User.DoesNotExist
         except User.DoesNotExist:
-            return Response({'error': 'Business user not found.'}, status=status.HTTP_404_NOT_FOUND)
+            return Response({'error': 'Kein Geschäftsnutzer mit der angegebenen ID gefunden.'}, status=status.HTTP_404_NOT_FOUND)
         
         completed_order_count = Order.objects.filter(business_user=business_user_id, status='completed').count()
         return Response({'completed_order_count': completed_order_count})
