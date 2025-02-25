@@ -185,4 +185,4 @@ The API follows the OpenAPI 3.0 specification. The schema and interactive docume
 
 ## License
 
-This project is licensed under the MIT License.
+You may use this code solely for non-commercial educational purposes. Any commercial use, distribution, or modification requires the author's explicit written consent..
