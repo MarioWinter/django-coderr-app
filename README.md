@@ -28,7 +28,6 @@ The Coderr API is a RESTful web service built with Django and Django REST Framew
     git clone <repository-url>
     cd Coderr_backend_v1.0.0
     ```
-    
 2. **Create a Virtual Environment:**
     ```bash
     python -m venv env
@@ -182,6 +181,25 @@ The API follows the OpenAPI 3.0 specification. The schema and interactive docume
 
 6. **Documentation:**
     - The API documentation is automatically generated from the code (using drf-spectacular) and is available through interactive interfaces (Swagger UI and Redoc).
+
+## Frontend
+
+The Coderr Frontend version 1.2.0 was used.
+
+The guest login has been changed as follows.
+
+```bash
+    const GUEST_LOGINS = {
+        customer : {
+            username: 'customeruser',
+            password: 'asdf1234'
+        },
+        business : {
+            username: 'businessuser',
+            password: 'asdf1234'
+        }
+    }
+```
 
 ## License
 
