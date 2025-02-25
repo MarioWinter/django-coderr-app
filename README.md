@@ -1,4 +1,3 @@
-````markdown
 # Coderr API
 
 ## Overview
@@ -29,8 +28,7 @@ The Coderr API is a RESTful web service built with Django and Django REST Framew
     git clone <repository-url>
     cd Coderr_backend_v1.0.0
     ```
-````
-
+    
 2. **Create a Virtual Environment:**
     ```bash
     python -m venv env
