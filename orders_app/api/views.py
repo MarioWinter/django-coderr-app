@@ -7,6 +7,7 @@ from rest_framework.filters import OrderingFilter, SearchFilter
 from django_filters.rest_framework import DjangoFilterBackend
 from django.contrib.auth import get_user_model
 from django.db.models import Avg, Q
+from rest_framework import serializers
 
 from offers_app.models import Offer
 from user_auth_app.models import UserProfile
@@ -16,6 +17,21 @@ from .permissions import OrderPermission, CustomerPermission, IsReviewerOrAdmin
 from .filters import ReviewFilter
 
 User = get_user_model()
+
+class OrderCountSerializer(serializers.Serializer):
+    """Serializer for OrderCountView."""
+    order_count = serializers.IntegerField()
+
+class CompletedOrderCountSerializer(serializers.Serializer):
+    """Serializer for CompletedOrderCountView."""
+    completed_order_count = serializers.IntegerField()
+
+class BaseInfoSerializer(serializers.Serializer):
+    """Serializer for BaseInfoView."""
+    review_count = serializers.IntegerField()
+    average_rating = serializers.FloatField()
+    business_profile_count = serializers.IntegerField()
+    offer_count = serializers.IntegerField()
 
 class OrderViewSet(viewsets.ModelViewSet):
     """
@@ -31,6 +47,8 @@ class OrderViewSet(viewsets.ModelViewSet):
         Returns orders where the user is either the customer or the business.
         """
         user = self.request.user
+        if not user.is_authenticated:
+            return Order.objects.none()
         return Order.objects.filter(Q(customer_user=user) | Q(business_user=user.id))
     
     def perform_create(self, serializer):
@@ -51,6 +69,7 @@ class OrderCountView(APIView):
         JSON response with key 'order_count' on success, or an error message.
     """
     permission_classes = []
+    serializer_class = OrderCountSerializer
 
     def get(self, request, business_user_id):
         """
@@ -62,9 +81,9 @@ class OrderCountView(APIView):
                 raise User.DoesNotExist
         except User.DoesNotExist:
             return Response({'error': 'Kein Geschäftsnutzer mit der angegebenen ID gefunden.'}, status=status.HTTP_404_NOT_FOUND)
-        
         order_count = Order.objects.filter(business_user=business_user_id, status='in_progress').count()
-        return Response({'order_count': order_count})
+        serializer = self.serializer_class({'order_count': order_count})
+        return Response(serializer.data)
 
 class CompletedOrderCountView(APIView):
     """
@@ -77,7 +96,7 @@ class CompletedOrderCountView(APIView):
         JSON response with key 'completed_order_count' on success, or an error message.
     """
     permission_classes = []
-
+    serializer_class = CompletedOrderCountSerializer
     def get(self, request, business_user_id):
         """
         Handles GET requests to count completed orders for a business user.
@@ -90,7 +109,8 @@ class CompletedOrderCountView(APIView):
             return Response({'error': 'Kein Geschäftsnutzer mit der angegebenen ID gefunden.'}, status=status.HTTP_404_NOT_FOUND)
         
         completed_order_count = Order.objects.filter(business_user=business_user_id, status='completed').count()
-        return Response({'completed_order_count': completed_order_count})
+        serializer = self.serializer_class({'completed_order_count': completed_order_count})
+        return Response(serializer.data)
 
 class ReviewViewSet(viewsets.ModelViewSet):
     """
@@ -134,7 +154,7 @@ class BaseInfoView(APIView):
           - offer_count: Total number of offers.
     """
     permission_classes = []
-
+    serializer_class = BaseInfoSerializer
     def get(self, request):
         review_count = Review.objects.count()
         avg_rating = Review.objects.aggregate(avg=Avg('rating'))['avg']
@@ -148,4 +168,5 @@ class BaseInfoView(APIView):
             'business_profile_count': business_profile_count,
             'offer_count': offer_count
         }
-        return Response(data, status=status.HTTP_200_OK)
+        serializer = self.serializer_class(data)
+        return Response(serializer.data, status=status.HTTP_200_OK)

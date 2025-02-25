@@ -26,7 +26,7 @@ class Order(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     
     def __str__(self):
-        return f"id: {self.id}, title: {self.title}, customer_user: {self.customer_user}, busines_user: {self.busines_user},  offer_type: {self.offer_type}"
+        return f"id: {self.id}, title: {self.title}, customer_user: {self.customer_user}, business_user: {self.business_user},  offer_type: {self.offer_type}"
 
 class Review(models.Model):
     """

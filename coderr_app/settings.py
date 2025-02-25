@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django_extensions',
+    'drf_spectacular',
     'rest_framework',
     'rest_framework.authtoken',
     'user_auth_app',
@@ -63,9 +64,6 @@ CSRF_TRUSTED_ORIGINS = [
 
   'http://127.0.0.1:5500',
   'http://localhost:5500',
-  'http://169.254.207.44:5500',
-
-
 ]
 
 
@@ -74,8 +72,6 @@ CORS_ALLOWED_ORIGINS = [
 
   'http://127.0.0.1:5500',
   'http://localhost:5500',
-  'http://169.254.207.44:5500',
-
 ]
 
 ROOT_URLCONF = 'coderr_app.urls'
@@ -173,13 +169,13 @@ REST_FRAMEWORK = {
         'contact-get': '20/second',
         'contact-post': '20/second'
         
-    }
-    # 'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+    },
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
 }
 
-# SPECTACULAR_SETTINGS = {
-#     'TITLE': 'Coderr API',
-#     'DESCRIPTION': 'A simple API for the ..XXX.. WebApp Coderr',
-#     'VERSION': '1.0.0',
-#     'SERVE_INCLUDE_SCHEMA': False,
-# }
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'Coderr API',
+    'DESCRIPTION': 'A simple API for the WebApp Coderr',
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,
+}

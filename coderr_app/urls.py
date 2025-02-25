@@ -19,11 +19,11 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 from user_auth_app.views import redirect_to_admin, redirect_to_schema
-#from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView
+from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView
 
 urlpatterns = [
-    path('', redirect_to_admin, name='root'),
-    #path('', redirect_to_schema, name='root'),
+    #path('', redirect_to_admin, name='root'),
+    path('', redirect_to_schema, name='root'),
     path('admin/', admin.site.urls),
     path('api/', redirect_to_schema, name='root'),
     path('api/', include('user_auth_app.api.urls')),
@@ -32,8 +32,8 @@ urlpatterns = [
     path('api-auth', include('rest_framework.urls')),
     
     ## API Schema & Doku
-    # path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
-    # path('api/schema/swagger-ui/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
-    # path('api/schema/redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
+    path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
+    path('api/schema/swagger-ui/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
+    path('api/schema/redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
 ]
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
