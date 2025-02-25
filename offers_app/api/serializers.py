@@ -33,7 +33,7 @@ class OfferSerializer(serializers.ModelSerializer):
         
     def to_representation(self, instance):
             """
-            Überschreibt die Ausgabe, um beim Lesen nur die URLs der Detailobjekte zurückzugeben.
+             Overrides output to return only URLs for detail objects when reading.
             """
             representation = super().to_representation(instance)
             request = self.context.get('request')

@@ -3,6 +3,9 @@ from django.contrib.auth.models import User
 from django.utils import timezone
 
 class UserProfile(models.Model):
+    """
+    Model representing additional user profile information.
+    """
     class UserType(models.TextChoices):
         BUSINESS = 'business', 'business'
         CUSTOMER = 'customer', 'customer'

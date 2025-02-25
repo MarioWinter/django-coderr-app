@@ -1,6 +1,8 @@
 from django.urls import path
 from .views import RegistrationView, UserProfileDetail, UserProfileBusinessList,UserProfileCustomerList, CustomLoginView
-
+"""
+URL routing for user authentication API endpoints.
+"""
 
 urlpatterns = [
     path('profile/<int:pk>/', UserProfileDetail.as_view(), name='userprofile-detail'),

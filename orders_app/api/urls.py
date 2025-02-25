@@ -1,7 +1,10 @@
 from django.urls import path, include
 from rest_framework import routers
-
 from .views import OrderViewSet, OrderCountView, CompletedOrderCountView, ReviewViewSet, BaseInfoView
+
+"""
+URL routing for orders_app API endpoints.
+"""
 
 router = routers.DefaultRouter()
 router.register(r'orders', OrderViewSet, basename='orders')

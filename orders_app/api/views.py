@@ -27,10 +27,16 @@ class OrderViewSet(viewsets.ModelViewSet):
     permission_classes = [OrderPermission, CustomerPermission]
     
     def get_queryset(self):
+        """
+        Returns orders where the user is either the customer or the business.
+        """
         user = self.request.user
         return Order.objects.filter(Q(customer_user=user) | Q(business_user=user.id))
     
     def perform_create(self, serializer):
+        """
+        Assigns the current user as the customer for the new order.
+        """
         serializer.save(customer_user=self.request.user)
 
 
@@ -47,6 +53,9 @@ class OrderCountView(APIView):
     permission_classes = []
 
     def get(self, request, business_user_id):
+        """
+        Handles GET requests to count in-progress orders for a business user.
+        """
         try:
             business_user = User.objects.get(pk=business_user_id)
             if not hasattr(business_user, 'profile') or business_user.profile.type != 'business':
@@ -70,6 +79,9 @@ class CompletedOrderCountView(APIView):
     permission_classes = []
 
     def get(self, request, business_user_id):
+        """
+        Handles GET requests to count completed orders for a business user.
+        """
         try:
             business_user = User.objects.get(pk=business_user_id)
             if not hasattr(business_user, 'profile') or business_user.profile.type != 'business':

@@ -13,6 +13,9 @@ class RegistrationView(APIView):
     permission_classes = [AllowAny]
     
     def post(self, request):
+        """
+        Registers a new user and returns an authentication token.
+        """
         serializer = RegistrationSerializer(data=request.data)
         if serializer.is_valid():
             saved_accound = serializer.save()
@@ -31,6 +34,9 @@ class CustomLoginView(ObtainAuthToken):
     permission_classes = [AllowAny]
     
     def post(self, request):
+        """
+        Authenticates a user and returns an authentication token.
+        """
         serializer = self.serializer_class(data=request.data)
         
         data = {}
@@ -58,11 +64,17 @@ class UserProfileDetail(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [ProfilePermission]
     
     def get_object(self):
+        """
+        Retrieves the user profile based on the user ID provided in the URL.
+        """
         obj = UserProfile.objects.get(user_id=self.kwargs['pk'])
         self.check_object_permissions(self.request, obj)
         return obj
     
     def update(self, request, *args, **kwargs):
+        """
+        Updates the user profile and the associated user fields.
+        """
         partial = kwargs.pop('partial', False)
         instance = self.get_object()
         serializer = self.get_serializer(instance, data=request.data, partial=partial)
@@ -79,11 +91,17 @@ class UserProfileDetail(generics.RetrieveUpdateDestroyAPIView):
         return Response(serializer.data)
     
 class UserProfileBusinessList(generics.ListAPIView):
+    """
+    Lists all business user profiles.
+    """
     queryset = UserProfile.objects.filter(type=UserProfile.UserType.BUSINESS)
     serializer_class = UserProfileBusinessSerializer
     permission_classes = [IsAuthenticated]
     
 class UserProfileCustomerList(generics.ListAPIView):
+    """
+    Lists all customer user profiles.
+    """
     queryset = UserProfile.objects.filter(type=UserProfile.UserType.CUSTOMER)
     serializer_class = UserProfileCustomerSerializer
     permission_classes = [IsAuthenticated]

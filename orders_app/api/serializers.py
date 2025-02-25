@@ -8,6 +8,9 @@ from offers_app.models import OfferDetail
 User = get_user_model()
 
 class OrderSerializer(serializers.ModelSerializer):
+    """
+    Serializer for the Order model.
+    """
     offer_detail_id = serializers.PrimaryKeyRelatedField(queryset=OfferDetail.objects.all(), write_only=True)
     customer_user = serializers.PrimaryKeyRelatedField(read_only=True)
     class Meta:
@@ -33,6 +36,9 @@ class OrderSerializer(serializers.ModelSerializer):
         return super().create(validated_data)
     
 class ReviewSerializer(serializers.ModelSerializer):
+    """
+    Serializer for the Review model.
+    """
     reviewer = serializers.PrimaryKeyRelatedField(read_only=True)
     business_user = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
     rating = serializers.DecimalField(

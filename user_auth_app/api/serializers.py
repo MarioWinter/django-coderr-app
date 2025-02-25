@@ -4,6 +4,9 @@ from user_auth_app.models import UserProfile
 
 
 class RegistrationSerializer(serializers.ModelSerializer):
+    """
+    Serializer for user registration.
+    """
     repeated_password = serializers.CharField(write_only=True)
     type = serializers.ChoiceField(choices=UserProfile.UserType.choices, write_only=True)
 
@@ -47,11 +50,17 @@ class RegistrationSerializer(serializers.ModelSerializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
+    """
+    Serializer for basic user information.
+    """
     class Meta:
         model = User
         fields = ['first_name', 'last_name', 'username']
 
 class UserProfileSerializer(serializers.ModelSerializer):
+    """
+    Serializer for detailed user profile.
+    """
     user = serializers.IntegerField(source='user.id', read_only=True)
     username = serializers.CharField(source='user.username')
     first_name = serializers.CharField(source='user.first_name')
@@ -65,6 +74,9 @@ class UserProfileSerializer(serializers.ModelSerializer):
 
       
 class UserProfileBusinessSerializer(serializers.ModelSerializer):
+    """
+    Serializer for business user profile.
+    """
     pk = serializers.IntegerField(source='user.id', read_only=True)
     username = serializers.CharField(source='user.username', read_only=True)
     first_name = serializers.CharField(source='user.first_name', read_only=True)
@@ -76,6 +88,9 @@ class UserProfileBusinessSerializer(serializers.ModelSerializer):
 
 
 class UserProfileCustomerSerializer(serializers.ModelSerializer):
+    """
+    Serializer for customer user profile.
+    """
     pk = serializers.IntegerField(source='user.id', read_only=True)
     username = serializers.CharField(source='user.username', read_only=True)
     first_name = serializers.CharField(source='user.first_name', read_only=True)

@@ -4,6 +4,10 @@ from django.core.validators import MinValueValidator
 from offers_app.models import OfferDetail
 
 class Order(models.Model):
+    """
+    Model representing an order placed by a customer based on an offer detail.
+    Contains aggregated information from the related offer detail.
+    """
     class OfferType(models.TextChoices):
         BASIC = 'basic', 'basic'
         STANDARD = 'standard', 'standard'
