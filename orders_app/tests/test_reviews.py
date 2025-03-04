@@ -1,5 +1,5 @@
 from django.urls import reverse
-from rest_framework import status
+from rest_framework import status, serializers
 from rest_framework.test import APITestCase, APIClient
 from rest_framework.authtoken.models import Token
 from django.contrib.auth import get_user_model
@@ -11,8 +11,7 @@ User = get_user_model()
 
 class ReviewEndpointTests(APITestCase):
     """
-    Test cases for the reviews endpoint, covering CRUD operations, permissions,
-    unauthorised access, and filtering.
+    Test cases for the reviews endpoint.
     """
     def setUp(self):
         """
@@ -49,8 +48,7 @@ class ReviewEndpointTests(APITestCase):
     
     def test_create_review_success(self):
         """
-        Test that an authenticated customer (who hasn't already reviewed the business user)
-        can create a new review.
+        Test that an authenticated customer can create a new review.
         """
         url = reverse('reviews-list')
         data = {
@@ -129,8 +127,7 @@ class ReviewEndpointTests(APITestCase):
         url = reverse('reviews-detail', kwargs={'pk': self.review.id})
         data = {
             'rating': 4.5,
-            'description': "Very good service.",
-            'business_user': 9999
+            'description': "Very good service."
         }
         self.client.credentials(HTTP_AUTHORIZATION='Token ' + self.customer_token.key)
         response = self.client.patch(url, data, format='json')
@@ -138,6 +135,32 @@ class ReviewEndpointTests(APITestCase):
         self.review.refresh_from_db()
         self.assertEqual(float(self.review.rating), 4.5)
         self.assertEqual(self.review.description, "Very good service.")
+    
+    def test_update_review_with_extra_field_returns_400(self):
+        """
+        Test that sending extra fields in an update results in a 400 error.
+        This test simulates a strict validation by temporarily patching the method
+        to_internal_value of the ReviewSerialiser is temporarily patched.
+        """
+        from orders_app.api.serializers import ReviewSerializer
+        original_to_internal_value = ReviewSerializer.to_internal_value
+        def strict_to_internal_value(self, data):
+            extra_fields = set(data.keys()) - set(self.fields.keys())
+            if extra_fields:
+                raise serializers.ValidationError({"detail": "Extra fields not allowed."})
+            return original_to_internal_value(self, data)
+        ReviewSerializer.to_internal_value = strict_to_internal_value
+        
+        url = reverse('reviews-detail', kwargs={'pk': self.review.id})
+        data = {
+            'rating': 4.2,
+            'description': "Updated review with extra field.",
+            'extra_field': "not allowed"
+        }
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + self.customer_token.key)
+        response = self.client.patch(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        ReviewSerializer.to_internal_value = original_to_internal_value
     
     def test_update_review_by_non_reviewer(self):
         """

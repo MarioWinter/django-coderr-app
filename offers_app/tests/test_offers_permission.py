@@ -1,31 +1,37 @@
 from django.urls import reverse
 from rest_framework import status
-from rest_framework.test import APITestCase
+from rest_framework.test import APITestCase, APIClient
 from django.contrib.auth import get_user_model
 from rest_framework.authtoken.models import Token
 from ..models import Offer, OfferDetail
+from user_auth_app.models import UserProfile
 
 User = get_user_model()
 
 class OfferPermissionTests(APITestCase):
     def setUp(self):
-        """Initialize test users and create sample offer"""
+        """Initialize test users and create sample offer with proper business profile for offer creation."""
         self.owner = User.objects.create_user(
             username='owner', 
             password='test123', 
             email='owner@example.com'
         )
+        UserProfile.objects.create(user=self.owner, type='business')
+
         self.admin = User.objects.create_superuser(
             username='admin',
             password='admin123',
             email='admin@example.com'
         )
+        UserProfile.objects.create(user=self.admin, type='business')
+        
         self.other_user = User.objects.create_user(
             username='other',
             password='other123',
             email='other@example.com'
         )
-        
+        UserProfile.objects.create(user=self.other_user, type='business')
+
         self.client.force_authenticate(user=self.owner)
         test_data = {
             "title": "Webdesign Package",
@@ -59,7 +65,7 @@ class OfferPermissionTests(APITestCase):
         }
         url = reverse('offers-list')
         response = self.client.post(url, test_data, format='json')
-        self.offer_id = response.data['id']
+        self.offer_id = response.data.get('id')
         self.client.logout()
 
     def test_unauthenticated_user_create(self):
@@ -150,6 +156,7 @@ class OfferPermissionTests(APITestCase):
         url = reverse('offers-detail', kwargs={'pk': self.offer_id})
         response = self.client.patch(url, {'title': 'Owner Updated'})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+        offer = Offer.objects.get(id=self.offer_id)
         self.assertEqual(response.data['title'], 'Owner Updated')
 
     def test_owner_delete(self):
@@ -163,6 +170,7 @@ class OfferDetailPermissionTests(APITestCase):
     def setUp(self):
         """Initialize test offer details"""
         self.owner = User.objects.create_user(username='owner', password='test123')
+        UserProfile.objects.create(user=self.owner, type='business')
         self.offer = Offer.objects.create(
             user=self.owner, 
             title="Test Offer", 

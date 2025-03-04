@@ -15,7 +15,7 @@ class OrderCountViewsTest(APITestCase):
 
     def test_order_count_view_api_creation(self):
         """
-        Test that a business user (provider) creates an offer with details, a customer creates an order based on that offer detail via the API,
+        Test that a business user creates an offer with details, a customer creates an order based on that offer detail via the API,
         and then the OrderCountView for the provider returns exactly 1 open (in_progress) order.
         """
         provider = User.objects.create_user(username='provider', email='provider@example.com', password='password123')
@@ -87,6 +87,9 @@ class OrderCountViewsTest(APITestCase):
         """
         Test that OrderCountView returns a 404 error for a non-existent business user.
         """
+        customer = User.objects.create_user(username='cust', password='pass', email='cust@example.com')
+        UserProfile.objects.create(user=customer, type='customer')
+        self.client.force_authenticate(user=customer)
         url = reverse('order-count', args=[9999])
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)

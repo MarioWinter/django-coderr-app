@@ -3,8 +3,7 @@ from rest_framework import status
 from rest_framework.test import APITestCase, APIClient
 from rest_framework.authtoken.models import Token
 from django.contrib.auth import get_user_model
-
-from ..models import Offer, OfferDetail
+from user_auth_app.models import UserProfile
 
 User = get_user_model()
 
@@ -12,14 +11,16 @@ class OffersAppFilterTest(APITestCase):
     def setUp(self):
         """Initialize test data for filtering"""
         self.user = User.objects.create_user(
-            username='testcustomeruser', 
+            username='testbusinessuser', 
             password='werte12345', 
             email='customer@gmail.com'
         )
+        UserProfile.objects.create(user=self.user, type='business')
         self.other_user = User.objects.create_user(
             username='otheruser',
             password='otherpass'
         )
+        UserProfile.objects.create(user=self.other_user, type='business')
         self.client = APIClient()
         
         self.user_token = Token.objects.create(user=self.user)
@@ -29,8 +30,8 @@ class OffersAppFilterTest(APITestCase):
             title="Webdesign Paket",
             description="Professionelle Webentwicklung",
             details=[
-                {'price': 100, 'delivery': 5, 'type': 'basic'},
-                {'price': 200, 'delivery': 7, 'type': 'standard'},
+                {'price': 250, 'delivery': 5, 'type': 'basic'},
+                {'price': 300, 'delivery': 7, 'type': 'standard'},
                 {'price': 500, 'delivery': 3, 'type': 'premium'}
             ]
         )
@@ -42,7 +43,7 @@ class OffersAppFilterTest(APITestCase):
             title="UI Design Paket",
             description="Moderne UI Lösungen",
             details=[
-                {'price': 150, 'delivery': 3, 'type': 'basic'},
+                {'price': 260, 'delivery': 3, 'type': 'basic'},
                 {'price': 300, 'delivery': 5, 'type': 'standard'},
                 {'price': 700, 'delivery': 2, 'type': 'premium'}
             ]
@@ -53,7 +54,6 @@ class OffersAppFilterTest(APITestCase):
     def create_offer(self, user, title, description, details):
         """Helper method to create offers with details"""
         offer_data = {
-            "user": user.id,
             "title": title,
             "description": description,
             "details": [{

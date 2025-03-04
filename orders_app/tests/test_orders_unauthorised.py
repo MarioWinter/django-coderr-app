@@ -3,7 +3,6 @@ from rest_framework import status
 from rest_framework.test import APITestCase, APIClient
 from rest_framework.authtoken.models import Token
 from django.contrib.auth import get_user_model
-
 from offers_app.models import Offer
 from orders_app.models import Order
 from user_auth_app.models import UserProfile
@@ -12,33 +11,11 @@ User = get_user_model()
 
 class OrderUnauthorisedTests(APITestCase):
     def setUp(self):
-        """Initialize test users and create sample order"""
-        self.owner = User.objects.create_user(
-            username='owner', 
-            password='test123', 
-            email='owner@example.com'
-        )
-        self.admin = User.objects.create_superuser(
-            username='admin',
-            password='admin123',
-            email='admin@example.com'
-        )
-        self.other_user = User.objects.create_user(
-            username='other',
-            password='other123',
-            email='other@example.com'
-        )
-        self.userprofile = UserProfile.objects.create(
-            user=self.owner,
-            file='/image.png',
-            location='Hamburg',
-            tel='+49040123456',
-            description='Test',
-            working_hours='5',
-            type='customer',
-            created_at = '2021-08-01T00:00:00Z'
-        )
-        self.client.force_authenticate(user=self.owner)
+        """Initialize test users and create sample order using proper roles."""
+        self.business_user = User.objects.create_user(username='offerbusiness', password='offerpass', email='offerbusiness@example.com')
+        UserProfile.objects.create(user=self.business_user, type='business')
+        business_client = APIClient()
+        business_client.force_authenticate(user=self.business_user)
         self.offer_data = {
             "title": "Webdesign Paket",
             "description": "Professionelle Webentwicklung",
@@ -70,12 +47,19 @@ class OrderUnauthorisedTests(APITestCase):
             ]
         }
         url = reverse('offers-list')
-        response_offer = self.client.post(url, self.offer_data, format='json')
-        self.offer = Offer.objects.get(id=response_offer.data['id'])
-        response_order = self.client.post(reverse('orders-list'), {"offer_detail_id": 1}, format='json')
-        self.order = Order.objects.get(id=response_order.data['id'])
-        self.client.logout()
+        response_offer = business_client.post(url, self.offer_data, format='json')
+        self.offer = Offer.objects.get(id=response_offer.data.get('id'))
         
+        self.owner = User.objects.create_user(username='owner', password='test123', email='owner@example.com')
+        UserProfile.objects.create(user=self.owner, type='customer')
+        self.client.force_authenticate(user=self.owner)
+        detail_id = self.offer.details.first().id
+        response_order = self.client.post(reverse('orders-list'), {"offer_detail_id": detail_id}, format='json')
+        self.order = Order.objects.get(id=response_order.data.get('id'))
+        self.client.logout()
+        self.other_user = User.objects.create_user(username='other', password='other123', email='other@example.com')
+        UserProfile.objects.create(user=self.other_user, type='customer')
+
     def test_unauthenticated_user_create_order(self):
         """Test unauthenticated user cannot create order"""
         url = reverse('orders-list')

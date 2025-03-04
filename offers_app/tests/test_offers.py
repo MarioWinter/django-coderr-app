@@ -3,14 +3,15 @@ from rest_framework import status
 from rest_framework.test import APITestCase, APIClient
 from rest_framework.authtoken.models import Token
 from django.contrib.auth import get_user_model
-
 from ..models import Offer, OfferDetail
+from user_auth_app.models import UserProfile
 
 User = get_user_model()
 
 class OffersAppTest(APITestCase):
     def setUp(self):
-        self.user = User.objects.create_user(username='testcustomeruser', password='werte12345', email='customer@gmail.com')
+        self.user = User.objects.create_user(username='testbusinessuser', password='werte12345', email='customer@gmail.com')
+        UserProfile.objects.create(user=self.user, type='business')
         self.token = Token.objects.create(user=self.user)
         self.client = APIClient(enforce_csrf_checks=True)
         self.client.credentials(HTTP_AUTHORIZATION='Token ' + self.token.key)
@@ -46,7 +47,7 @@ class OffersAppTest(APITestCase):
         }
         url = reverse('offers-list')
         response = self.client.post(url, self.offer_data, format='json')
-        self.offer = Offer.objects.get(id=response.data['id'])
+        self.offer = Offer.objects.get(id=response.data.get('id'))
         
     def test_list_create_offers(self):
         """Tests POST /offers/ endpoint for creating a new offer with three required details."""
@@ -113,16 +114,16 @@ class OffersAppTest(APITestCase):
         data = {
             'title':'Updated Grafikdesign-Paket',
             'details':[
-                    {
+                {
                     "title": "Basic Design Updated",
                     "revisions": 3,
                     "delivery_time_in_days": 6,
                     "price": 120.00,
                     "features": ["Logo Design","Flyer"],
                     "offer_type": "basic"
-                    }
-                ],
-            }
+                }
+            ],
+        }
         response = self.client.patch(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.offer.refresh_from_db()
@@ -144,4 +145,3 @@ class OffersAppTest(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['offer_type'], 'basic')
         self.assertEqual(float(response.data['price']), 100.00)
-

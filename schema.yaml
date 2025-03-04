@@ -2,7 +2,8 @@ openapi: 3.0.3
 info:
     title: Coderr API
     version: 1.0.0
-    description: A simple API for the Freelancer Plattform WebApp Coderr
+    description: A simple API for the Freelancer platform Coderr
+
 paths:
     /api/base-info/:
         get:
@@ -10,46 +11,45 @@ paths:
             description: |-
                 Retrieve general platform statistics.
 
-                GET /base-info/
-
-                Returns:
-                    JSON response with:
-                      - review_count: Total number of reviews.
-                      - average_rating: Average review score (rounded to one decimal).
-                      - business_profile_count: Number of business profiles.
-                      - offer_count: Total number of offers.
+                Returns a JSON response with:
+                  - review_count: Total number of reviews.
+                  - average_rating: Average review score (rounded to one decimal).
+                  - business_profile_count: Number of business profiles.
+                  - offer_count: Total number of offers.
             tags:
                 - base-info
             security:
                 - tokenAuth: []
             responses:
                 "200":
+                    description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: "#/components/schemas/BaseInfo"
-                    description: ""
+
     /api/completed-order-count/{business_user_id}/:
         get:
             operationId: completed_order_count_retrieve
             description: Handles GET requests to count completed orders for a business user.
+            tags:
+                - completed-order-count
             parameters:
                 - in: path
                   name: business_user_id
+                  required: true
                   schema:
                       type: integer
-                  required: true
-            tags:
-                - completed-order-count
             security:
                 - tokenAuth: []
             responses:
                 "200":
+                    description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: "#/components/schemas/CompletedOrderCount"
-                    description: ""
+
     /api/login/:
         post:
             operationId: login_create
@@ -57,106 +57,113 @@ paths:
             tags:
                 - login
             requestBody:
+                required: true
                 content:
+                    application/json:
+                        schema:
+                            $ref: "#/components/schemas/AuthToken"
                     application/x-www-form-urlencoded:
                         schema:
                             $ref: "#/components/schemas/AuthToken"
                     multipart/form-data:
                         schema:
                             $ref: "#/components/schemas/AuthToken"
-                    application/json:
-                        schema:
-                            $ref: "#/components/schemas/AuthToken"
-                required: true
             security:
                 - tokenAuth: []
                 - {}
             responses:
                 "200":
+                    description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: "#/components/schemas/AuthToken"
-                    description: ""
+
     /api/offerdetails/{id}/:
         get:
             operationId: offerdetails_retrieve
-            description: RetrieveAPIView for fetching offer detail.
+            description: Retrieve a single offer detail.
+            tags:
+                - offerdetails
             parameters:
                 - in: path
                   name: id
+                  required: true
                   schema:
                       type: integer
-                  required: true
-            tags:
-                - offerdetails
             security:
                 - tokenAuth: []
             responses:
                 "200":
+                    description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: "#/components/schemas/OfferDetail"
-                    description: ""
+
     /api/offers/:
         get:
             operationId: offers_list
-            description: ViewSet for handling offers.
+            description: |-
+                List offers with filtering, ordering, pagination, and search support.
+                Query parameters include:
+                  - creator_id: Filter offers by creator's user ID.
+                  - min_price: Filter offers with a minimum aggregated price.
+                  - max_delivery_time: Filter offers with a maximum aggregated delivery time.
+                  - ordering: Field used for ordering results.
+                  - page, page_size: Pagination parameters.
+                  - search: Search term to match in title and description.
+            tags:
+                - offers
             parameters:
                 - in: query
                   name: creator_id
                   schema:
                       type: integer
                 - in: query
+                  name: min_price
+                  schema:
+                      type: number
+                - in: query
                   name: max_delivery_time
                   schema:
                       type: integer
                 - in: query
-                  name: min_price
-                  schema:
-                      type: number
-                - name: ordering
-                  required: false
-                  in: query
-                  description: Which field to use when ordering the results.
+                  name: ordering
                   schema:
                       type: string
-                - name: page
-                  required: false
-                  in: query
-                  description: A page number within the paginated result set.
+                  description: Field to order by.
+                - in: query
+                  name: page
                   schema:
                       type: integer
-                - name: page_size
-                  required: false
-                  in: query
-                  description: Number of results to return per page.
+                  description: Page number.
+                - in: query
+                  name: page_size
                   schema:
                       type: integer
-                - name: search
-                  required: false
-                  in: query
-                  description: A search term.
+                  description: Number of results per page.
+                - in: query
+                  name: search
                   schema:
                       type: string
-            tags:
-                - offers
+                  description: Search term.
             security:
                 - tokenAuth: []
             responses:
                 "200":
+                    description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: "#/components/schemas/PaginatedOfferList"
-                    description: ""
         post:
             operationId: offers_create
-            description: ViewSet for handling offers.
+            description: Create a new offer along with exactly three offer detail objects.
             tags:
                 - offers
             requestBody:
+                required: true
                 content:
                     application/json:
                         schema:
@@ -167,51 +174,52 @@ paths:
                     multipart/form-data:
                         schema:
                             $ref: "#/components/schemas/Offer"
-                required: true
             security:
                 - tokenAuth: []
             responses:
                 "201":
+                    description: Created
                     content:
                         application/json:
                             schema:
                                 $ref: "#/components/schemas/Offer"
-                    description: ""
+
     /api/offers/{id}/:
         get:
             operationId: offers_retrieve
-            description: ViewSet for handling offers.
+            description: Retrieve details of a specific offer.
+            tags:
+                - offers
             parameters:
                 - in: path
                   name: id
+                  required: true
                   schema:
                       type: integer
-                  description: A unique integer value identifying this offer.
-                  required: true
-            tags:
-                - offers
+                  description: Unique offer ID.
             security:
                 - tokenAuth: []
             responses:
                 "200":
+                    description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: "#/components/schemas/Offer"
-                    description: ""
         put:
             operationId: offers_update
-            description: ViewSet for handling offers.
+            description: Fully update an offer.
+            tags:
+                - offers
             parameters:
                 - in: path
                   name: id
+                  required: true
                   schema:
                       type: integer
-                  description: A unique integer value identifying this offer.
-                  required: true
-            tags:
-                - offers
+                  description: Unique offer ID.
             requestBody:
+                required: true
                 content:
                     application/json:
                         schema:
@@ -222,29 +230,29 @@ paths:
                     multipart/form-data:
                         schema:
                             $ref: "#/components/schemas/Offer"
-                required: true
             security:
                 - tokenAuth: []
             responses:
                 "200":
+                    description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: "#/components/schemas/Offer"
-                    description: ""
         patch:
             operationId: offers_partial_update
-            description: ViewSet for handling offers.
+            description: Partially update an offer.
+            tags:
+                - offers
             parameters:
                 - in: path
                   name: id
+                  required: true
                   schema:
                       type: integer
-                  description: A unique integer value identifying this offer.
-                  required: true
-            tags:
-                - offers
+                  description: Unique offer ID.
             requestBody:
+                required: true
                 content:
                     application/json:
                         schema:
@@ -259,79 +267,76 @@ paths:
                 - tokenAuth: []
             responses:
                 "200":
+                    description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: "#/components/schemas/Offer"
-                    description: ""
         delete:
             operationId: offers_destroy
-            description: ViewSet for handling offers.
+            description: Delete an offer.
+            tags:
+                - offers
             parameters:
                 - in: path
                   name: id
+                  required: true
                   schema:
                       type: integer
-                  description: A unique integer value identifying this offer.
-                  required: true
-            tags:
-                - offers
+                  description: Unique offer ID.
             security:
                 - tokenAuth: []
             responses:
                 "204":
-                    description: No response body
+                    description: No Content
+
     /api/order-count/{business_user_id}/:
         get:
             operationId: order_count_retrieve
-            description: Handles GET requests to count in-progress orders for a business
-                user.
+            description: Retrieve the count of in-progress orders for a business user.
+            tags:
+                - order-count
             parameters:
                 - in: path
                   name: business_user_id
+                  required: true
                   schema:
                       type: integer
-                  required: true
-            tags:
-                - order-count
             security:
                 - tokenAuth: []
             responses:
                 "200":
+                    description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: "#/components/schemas/OrderCount"
-                    description: ""
+
     /api/orders/:
         get:
             operationId: orders_list
             description: |-
-                ViewSet for managing orders.
-                Provides standard CRUD operations on Order objects filtered by the current authenticated customer.
-                Automatically assigns the current user as the customer when creating new orders.
+                List orders for the current authenticated customer or business user.
             tags:
                 - orders
             security:
                 - tokenAuth: []
             responses:
                 "200":
+                    description: OK
                     content:
                         application/json:
                             schema:
                                 type: array
                                 items:
                                     $ref: "#/components/schemas/Order"
-                    description: ""
         post:
             operationId: orders_create
-            description: |-
-                ViewSet for managing orders.
-                Provides standard CRUD operations on Order objects filtered by the current authenticated customer.
-                Automatically assigns the current user as the customer when creating new orders.
+            description: Create a new order. The current user is automatically assigned as the customer.
             tags:
                 - orders
             requestBody:
+                required: true
                 content:
                     application/json:
                         schema:
@@ -342,57 +347,52 @@ paths:
                     multipart/form-data:
                         schema:
                             $ref: "#/components/schemas/Order"
-                required: true
             security:
                 - tokenAuth: []
             responses:
                 "201":
+                    description: Created
                     content:
                         application/json:
                             schema:
                                 $ref: "#/components/schemas/Order"
-                    description: ""
+
     /api/orders/{id}/:
         get:
             operationId: orders_retrieve
-            description: |-
-                ViewSet for managing orders.
-                Provides standard CRUD operations on Order objects filtered by the current authenticated customer.
-                Automatically assigns the current user as the customer when creating new orders.
+            description: Retrieve details of a specific order.
+            tags:
+                - orders
             parameters:
                 - in: path
                   name: id
+                  required: true
                   schema:
                       type: integer
-                  description: A unique integer value identifying this order.
-                  required: true
-            tags:
-                - orders
+                  description: Unique order ID.
             security:
                 - tokenAuth: []
             responses:
                 "200":
+                    description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: "#/components/schemas/Order"
-                    description: ""
         put:
             operationId: orders_update
-            description: |-
-                ViewSet for managing orders.
-                Provides standard CRUD operations on Order objects filtered by the current authenticated customer.
-                Automatically assigns the current user as the customer when creating new orders.
+            description: Fully update an order.
+            tags:
+                - orders
             parameters:
                 - in: path
                   name: id
+                  required: true
                   schema:
                       type: integer
-                  description: A unique integer value identifying this order.
-                  required: true
-            tags:
-                - orders
+                  description: Unique order ID.
             requestBody:
+                required: true
                 content:
                     application/json:
                         schema:
@@ -403,32 +403,31 @@ paths:
                     multipart/form-data:
                         schema:
                             $ref: "#/components/schemas/Order"
-                required: true
             security:
                 - tokenAuth: []
             responses:
                 "200":
+                    description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: "#/components/schemas/Order"
-                    description: ""
         patch:
             operationId: orders_partial_update
             description: |-
-                ViewSet for managing orders.
-                Provides standard CRUD operations on Order objects filtered by the current authenticated customer.
-                Automatically assigns the current user as the customer when creating new orders.
+                Partially update an order.
+                Note: Only users with a business profile can update order status.
+            tags:
+                - orders
             parameters:
                 - in: path
                   name: id
+                  required: true
                   schema:
                       type: integer
-                  description: A unique integer value identifying this order.
-                  required: true
-            tags:
-                - orders
+                  description: Unique order ID.
             requestBody:
+                required: true
                 content:
                     application/json:
                         schema:
@@ -443,72 +442,66 @@ paths:
                 - tokenAuth: []
             responses:
                 "200":
+                    description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: "#/components/schemas/Order"
-                    description: ""
         delete:
             operationId: orders_destroy
-            description: |-
-                ViewSet for managing orders.
-                Provides standard CRUD operations on Order objects filtered by the current authenticated customer.
-                Automatically assigns the current user as the customer when creating new orders.
+            description: Delete an order.
+            tags:
+                - orders
             parameters:
                 - in: path
                   name: id
+                  required: true
                   schema:
                       type: integer
-                  description: A unique integer value identifying this order.
-                  required: true
-            tags:
-                - orders
+                  description: Unique order ID.
             security:
                 - tokenAuth: []
             responses:
                 "204":
-                    description: No response body
+                    description: No Content
+
     /api/profile/{user}/:
         get:
             operationId: profile_retrieve
             description: |-
-                Retrieve, update, or delete a user's profile.
-                GET requests are allowed for any authenticated user.
-                PATCH, PUT, DELETE requests require that the user is the owner or an admin.
+                Retrieve a user's profile.
+            tags:
+                - profile
             parameters:
                 - in: path
                   name: user
+                  required: true
                   schema:
                       type: integer
-                  description: A unique value identifying this user profile.
-                  required: true
-            tags:
-                - profile
+                  description: Unique user ID.
             security:
                 - tokenAuth: []
             responses:
                 "200":
+                    description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: "#/components/schemas/UserProfile"
-                    description: ""
         put:
             operationId: profile_update
-            description: |-
-                Retrieve, update, or delete a user's profile.
-                GET requests are allowed for any authenticated user.
-                PATCH, PUT, DELETE requests require that the user is the owner or an admin.
+            description: Fully update a user's profile.
+            tags:
+                - profile
             parameters:
                 - in: path
                   name: user
+                  required: true
                   schema:
                       type: integer
-                  description: A unique value identifying this user profile.
-                  required: true
-            tags:
-                - profile
+                  description: Unique user ID.
             requestBody:
+                required: true
                 content:
                     application/json:
                         schema:
@@ -519,32 +512,29 @@ paths:
                     multipart/form-data:
                         schema:
                             $ref: "#/components/schemas/UserProfile"
-                required: true
             security:
                 - tokenAuth: []
             responses:
                 "200":
+                    description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: "#/components/schemas/UserProfile"
-                    description: ""
         patch:
             operationId: profile_partial_update
-            description: |-
-                Retrieve, update, or delete a user's profile.
-                GET requests are allowed for any authenticated user.
-                PATCH, PUT, DELETE requests require that the user is the owner or an admin.
+            description: Partially update a user's profile.
+            tags:
+                - profile
             parameters:
                 - in: path
                   name: user
+                  required: true
                   schema:
                       type: integer
-                  description: A unique value identifying this user profile.
-                  required: true
-            tags:
-                - profile
+                  description: Unique user ID.
             requestBody:
+                required: true
                 content:
                     application/json:
                         schema:
@@ -559,65 +549,65 @@ paths:
                 - tokenAuth: []
             responses:
                 "200":
+                    description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: "#/components/schemas/UserProfile"
-                    description: ""
         delete:
             operationId: profile_destroy
-            description: |-
-                Retrieve, update, or delete a user's profile.
-                GET requests are allowed for any authenticated user.
-                PATCH, PUT, DELETE requests require that the user is the owner or an admin.
+            description: Delete a user's profile.
+            tags:
+                - profile
             parameters:
                 - in: path
                   name: user
+                  required: true
                   schema:
                       type: integer
-                  description: A unique value identifying this user profile.
-                  required: true
-            tags:
-                - profile
+                  description: Unique user ID.
             security:
                 - tokenAuth: []
             responses:
                 "204":
-                    description: No response body
+                    description: No Content
+
     /api/profiles/business/:
         get:
             operationId: profiles_business_list
-            description: Lists all business user profiles.
+            description: List all business user profiles.
             tags:
                 - profiles
             security:
                 - tokenAuth: []
             responses:
                 "200":
+                    description: OK
                     content:
                         application/json:
                             schema:
                                 type: array
                                 items:
                                     $ref: "#/components/schemas/UserProfileBusiness"
-                    description: ""
+
     /api/profiles/customer/:
         get:
             operationId: profiles_customer_list
-            description: Lists all customer user profiles.
+            description: List all customer user profiles.
             tags:
                 - profiles
             security:
                 - tokenAuth: []
             responses:
                 "200":
+                    description: OK
                     content:
                         application/json:
                             schema:
                                 type: array
                                 items:
                                     $ref: "#/components/schemas/UserProfileCustomer"
-                    description: ""
+
     /api/registration/:
         post:
             operationId: registration_create
@@ -625,6 +615,7 @@ paths:
             tags:
                 - registration
             requestBody:
+                required: true
                 content:
                     application/json:
                         schema:
@@ -635,69 +626,57 @@ paths:
                     multipart/form-data:
                         schema:
                             $ref: "#/components/schemas/Registration"
-                required: true
             security:
                 - tokenAuth: []
                 - {}
             responses:
                 "200":
+                    description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: "#/components/schemas/Registration"
-                    description: ""
+
     /api/reviews/:
         get:
             operationId: reviews_list
             description: |-
-                ViewSet for managing reviews.
-
-                Provides list, create, retrieve, update, and delete operations.
-
-                GET: Accessible to everyone.
-                POST: Only authenticated users with a customer profile can create reviews. A user may only submit one review per business user.
-                PATCH, DELETE: Only the review's creator (reviewer) or an admin may modify or delete a review.
+                Manage reviews: list reviews with optional filtering by business_user_id or reviewer_id, ordering, etc.
+            tags:
+                - reviews
             parameters:
                 - in: query
                   name: business_user_id
                   schema:
                       type: integer
-                - name: ordering
-                  required: false
-                  in: query
-                  description: Which field to use when ordering the results.
-                  schema:
-                      type: string
                 - in: query
                   name: reviewer_id
                   schema:
                       type: integer
-            tags:
-                - reviews
+                - in: query
+                  name: ordering
+                  schema:
+                      type: string
+                  description: Field to order by.
             security:
                 - tokenAuth: []
             responses:
                 "200":
+                    description: OK
                     content:
                         application/json:
                             schema:
                                 type: array
                                 items:
                                     $ref: "#/components/schemas/Review"
-                    description: ""
         post:
             operationId: reviews_create
             description: |-
-                ViewSet for managing reviews.
-
-                Provides list, create, retrieve, update, and delete operations.
-
-                GET: Accessible to everyone.
-                POST: Only authenticated users with a customer profile can create reviews. A user may only submit one review per business user.
-                PATCH, DELETE: Only the review's creator (reviewer) or an admin may modify or delete a review.
+                Create a new review. Only authenticated customers can create reviews. A customer may only submit one review per business user.
             tags:
                 - reviews
             requestBody:
+                required: true
                 content:
                     application/json:
                         schema:
@@ -708,65 +687,52 @@ paths:
                     multipart/form-data:
                         schema:
                             $ref: "#/components/schemas/Review"
-                required: true
             security:
                 - tokenAuth: []
             responses:
                 "201":
+                    description: Created
                     content:
                         application/json:
                             schema:
                                 $ref: "#/components/schemas/Review"
-                    description: ""
+
     /api/reviews/{id}/:
         get:
             operationId: reviews_retrieve
-            description: |-
-                ViewSet for managing reviews.
-
-                Provides list, create, retrieve, update, and delete operations.
-
-                GET: Accessible to everyone.
-                POST: Only authenticated users with a customer profile can create reviews. A user may only submit one review per business user.
-                PATCH, DELETE: Only the review's creator (reviewer) or an admin may modify or delete a review.
+            description: Retrieve a specific review.
+            tags:
+                - reviews
             parameters:
                 - in: path
                   name: id
+                  required: true
                   schema:
                       type: integer
-                  description: A unique integer value identifying this review.
-                  required: true
-            tags:
-                - reviews
+                  description: Unique review ID.
             security:
                 - tokenAuth: []
             responses:
                 "200":
+                    description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: "#/components/schemas/Review"
-                    description: ""
         put:
             operationId: reviews_update
-            description: |-
-                ViewSet for managing reviews.
-
-                Provides list, create, retrieve, update, and delete operations.
-
-                GET: Accessible to everyone.
-                POST: Only authenticated users with a customer profile can create reviews. A user may only submit one review per business user.
-                PATCH, DELETE: Only the review's creator (reviewer) or an admin may modify or delete a review.
+            description: Fully update a review.
+            tags:
+                - reviews
             parameters:
                 - in: path
                   name: id
+                  required: true
                   schema:
                       type: integer
-                  description: A unique integer value identifying this review.
-                  required: true
-            tags:
-                - reviews
+                  description: Unique review ID.
             requestBody:
+                required: true
                 content:
                     application/json:
                         schema:
@@ -777,36 +743,30 @@ paths:
                     multipart/form-data:
                         schema:
                             $ref: "#/components/schemas/Review"
-                required: true
             security:
                 - tokenAuth: []
             responses:
                 "200":
+                    description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: "#/components/schemas/Review"
-                    description: ""
         patch:
             operationId: reviews_partial_update
             description: |-
-                ViewSet for managing reviews.
-
-                Provides list, create, retrieve, update, and delete operations.
-
-                GET: Accessible to everyone.
-                POST: Only authenticated users with a customer profile can create reviews. A user may only submit one review per business user.
-                PATCH, DELETE: Only the review's creator (reviewer) or an admin may modify or delete a review.
+                Partially update a review. Only 'rating' and 'description' fields are allowed.
+            tags:
+                - reviews
             parameters:
                 - in: path
                   name: id
+                  required: true
                   schema:
                       type: integer
-                  description: A unique integer value identifying this review.
-                  required: true
-            tags:
-                - reviews
+                  description: Unique review ID.
             requestBody:
+                required: true
                 content:
                     application/json:
                         schema:
@@ -821,35 +781,29 @@ paths:
                 - tokenAuth: []
             responses:
                 "200":
+                    description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: "#/components/schemas/Review"
-                    description: ""
         delete:
             operationId: reviews_destroy
-            description: |-
-                ViewSet for managing reviews.
-
-                Provides list, create, retrieve, update, and delete operations.
-
-                GET: Accessible to everyone.
-                POST: Only authenticated users with a customer profile can create reviews. A user may only submit one review per business user.
-                PATCH, DELETE: Only the review's creator (reviewer) or an admin may modify or delete a review.
+            description: Delete a review.
+            tags:
+                - reviews
             parameters:
                 - in: path
                   name: id
+                  required: true
                   schema:
                       type: integer
-                  description: A unique integer value identifying this review.
-                  required: true
-            tags:
-                - reviews
+                  description: Unique review ID.
             security:
                 - tokenAuth: []
             responses:
                 "204":
-                    description: No response body
+                    description: No Content
+
 components:
     schemas:
         AuthToken:
@@ -865,12 +819,12 @@ components:
                     type: string
                     readOnly: true
             required:
+                - username
                 - password
                 - token
-                - username
         BaseInfo:
             type: object
-            description: Serializer for BaseInfoView.
+            description: Schema for BaseInfoView.
             properties:
                 review_count:
                     type: integer
@@ -882,28 +836,25 @@ components:
                 offer_count:
                     type: integer
             required:
+                - review_count
                 - average_rating
                 - business_profile_count
                 - offer_count
-                - review_count
         CompletedOrderCount:
             type: object
-            description: Serializer for CompletedOrderCountView.
+            description: Schema for CompletedOrderCountView.
             properties:
                 completed_order_count:
                     type: integer
             required:
                 - completed_order_count
         NullEnum:
+            type: string
             enum:
                 - null
         Offer:
             type: object
-            description: |-
-                Serializer for the Offer model.
-                The field 'details' is used for both input and output.
-                On write operations, it accepts a list of detail objects.
-                On read operations, the output is transformed (z.B. to only show URLs).
+            description: Schema for the Offer model.
             properties:
                 id:
                     type: integer
@@ -936,7 +887,7 @@ components:
                 min_price:
                     type: string
                     format: decimal
-                    pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+                    pattern: "^-?\\d{0,8}(?:\\.\\d{0,2})?$"
                     readOnly: true
                 min_delivery_time:
                     type: integer
@@ -946,19 +897,19 @@ components:
                         - $ref: "#/components/schemas/User"
                     readOnly: true
             required:
-                - created_at
+                - id
+                - user
+                - title
                 - description
                 - details
-                - id
-                - min_delivery_time
-                - min_price
-                - title
+                - created_at
                 - updated_at
-                - user
+                - min_price
+                - min_delivery_time
                 - user_details
         OfferDetail:
             type: object
-            description: Serializer for OfferDetail model.
+            description: Schema for the OfferDetail model.
             properties:
                 id:
                     type: integer
@@ -968,43 +919,40 @@ components:
                     maxLength: 255
                 revisions:
                     type: integer
-                    maximum: 9223372036854775807
                     minimum: -1
                     format: int64
                 delivery_time_in_days:
                     type: integer
-                    maximum: 9223372036854775807
                     minimum: 0
                     format: int64
                 price:
                     type: number
                     format: double
-                    maximum: 100000000
-                    minimum: -100000000
-                    exclusiveMaximum: true
-                    exclusiveMinimum: true
-                features: {}
+                features:
+                    type: object
                 offer_type:
                     $ref: "#/components/schemas/OfferTypeEnum"
             required:
-                - delivery_time_in_days
-                - features
                 - id
-                - price
                 - title
+                - revisions
+                - delivery_time_in_days
+                - price
+                - features
+                - offer_type
         OfferTypeEnum:
+            type: string
             enum:
                 - basic
                 - standard
                 - premium
-            type: string
-            description: |-
+            description: |
                 * `basic` - basic
                 * `standard` - standard
                 * `premium` - premium
         Order:
             type: object
-            description: Serializer for the Order model.
+            description: Schema for the Order model.
             properties:
                 id:
                     type: integer
@@ -1031,22 +979,23 @@ components:
                 price:
                     type: string
                     format: decimal
-                    pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+                    pattern: "^-?\\d{0,8}(?:\\.\\d{0,2})?$"
                     readOnly: true
                     nullable: true
                 features:
+                    type: object
                     readOnly: true
                     nullable: true
                 offer_type:
-                    readOnly: true
-                    nullable: true
                     oneOf:
                         - $ref: "#/components/schemas/OfferTypeEnum"
                         - $ref: "#/components/schemas/NullEnum"
+                    readOnly: true
+                    nullable: true
                 status:
                     type: string
-                    nullable: true
                     maxLength: 255
+                    nullable: true
                 created_at:
                     type: string
                     format: date-time
@@ -1059,26 +1008,19 @@ components:
                     type: integer
                     writeOnly: true
             required:
-                - business_user
-                - created_at
-                - customer_user
-                - delivery_time_in_days
-                - features
                 - id
-                - offer_detail_id
-                - offer_type
-                - price
-                - revisions
+                - customer_user
+                - business_user
                 - title
+                - revisions
+                - delivery_time_in_days
+                - price
+                - features
+                - offer_type
+                - status
+                - created_at
                 - updated_at
-        OrderCount:
-            type: object
-            description: Serializer for OrderCountView.
-            properties:
-                order_count:
-                    type: integer
-            required:
-                - order_count
+                - offer_detail_id
         PaginatedOfferList:
             type: object
             required:
@@ -1092,30 +1034,20 @@ components:
                     type: string
                     nullable: true
                     format: uri
-                    example: http://api.example.org/accounts/?page=4
+                    example: "http://api.example.org/accounts/?page=4"
                 previous:
                     type: string
                     nullable: true
                     format: uri
-                    example: http://api.example.org/accounts/?page=2
+                    example: "http://api.example.org/accounts/?page=2"
                 results:
                     type: array
                     items:
                         $ref: "#/components/schemas/Offer"
         PatchedOffer:
             type: object
-            description: |-
-                Serializer for the Offer model.
-                The field 'details' is used for both input and output.
-                On write operations, it accepts a list of detail objects.
-                On read operations, the output is transformed (z.B. to only show URLs).
+            description: Schema for partially updating an Offer.
             properties:
-                id:
-                    type: integer
-                    readOnly: true
-                user:
-                    type: integer
-                    readOnly: true
                 title:
                     type: string
                     maxLength: 255
@@ -1125,99 +1057,19 @@ components:
                     nullable: true
                 description:
                     type: string
-                created_at:
-                    type: string
-                    format: date-time
-                    readOnly: true
-                updated_at:
-                    type: string
-                    format: date-time
-                    readOnly: true
-                details:
-                    type: array
-                    items:
-                        $ref: "#/components/schemas/OfferDetail"
-                    writeOnly: true
-                min_price:
-                    type: string
-                    format: decimal
-                    pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
-                    readOnly: true
-                min_delivery_time:
-                    type: integer
-                    readOnly: true
-                user_details:
-                    allOf:
-                        - $ref: "#/components/schemas/User"
-                    readOnly: true
+            # Note: 'details' is not allowed in a partial update.
         PatchedOrder:
             type: object
-            description: Serializer for the Order model.
+            description: Schema for partially updating an Order.
             properties:
-                id:
-                    type: integer
-                    readOnly: true
-                customer_user:
-                    type: integer
-                    readOnly: true
-                business_user:
-                    type: integer
-                    readOnly: true
-                    nullable: true
-                title:
-                    type: string
-                    readOnly: true
-                    nullable: true
-                revisions:
-                    type: integer
-                    readOnly: true
-                    nullable: true
-                delivery_time_in_days:
-                    type: integer
-                    readOnly: true
-                    nullable: true
-                price:
-                    type: string
-                    format: decimal
-                    pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
-                    readOnly: true
-                    nullable: true
-                features:
-                    readOnly: true
-                    nullable: true
-                offer_type:
-                    readOnly: true
-                    nullable: true
-                    oneOf:
-                        - $ref: "#/components/schemas/OfferTypeEnum"
-                        - $ref: "#/components/schemas/NullEnum"
                 status:
                     type: string
-                    nullable: true
                     maxLength: 255
-                created_at:
-                    type: string
-                    format: date-time
-                    readOnly: true
-                updated_at:
-                    type: string
-                    format: date-time
-                    readOnly: true
-                offer_detail_id:
-                    type: integer
-                    writeOnly: true
+            # Other fields are read-only.
         PatchedReview:
             type: object
-            description: Serializer for the Review model.
+            description: Schema for partially updating a Review.
             properties:
-                id:
-                    type: integer
-                    readOnly: true
-                business_user:
-                    type: integer
-                reviewer:
-                    type: integer
-                    readOnly: true
                 rating:
                     type: number
                     format: double
@@ -1227,70 +1079,19 @@ components:
                     exclusiveMinimum: true
                 description:
                     type: string
-                    nullable: true
-                created_at:
-                    type: string
-                    format: date-time
-                    readOnly: true
-                updated_at:
-                    type: string
-                    format: date-time
-                    readOnly: true
-        PatchedUserProfile:
-            type: object
-            description: Serializer for detailed user profile.
-            properties:
-                user:
-                    type: integer
-                    readOnly: true
-                username:
-                    type: string
-                first_name:
-                    type: string
-                last_name:
-                    type: string
-                file:
-                    type: string
-                    format: uri
-                    nullable: true
-                location:
-                    type: string
-                    nullable: true
-                    maxLength: 100
-                tel:
-                    type: string
-                    nullable: true
-                    maxLength: 20
-                description:
-                    type: string
-                    nullable: true
-                working_hours:
-                    type: string
-                    nullable: true
-                    maxLength: 100
-                type:
-                    $ref: "#/components/schemas/TypeEnum"
-                email:
-                    type: string
-                    format: email
-                created_at:
-                    type: string
-                    format: date-time
-                    readOnly: true
+            # Only 'rating' and 'description' are allowed.
         Registration:
             type: object
-            description: Serializer for user registration.
+            description: Schema for user registration.
             properties:
                 username:
                     type: string
-                    description: Required. 150 characters or fewer. Letters, digits and @/./+/-/_
-                        only.
-                    pattern: ^[\w.@+-]+$
                     maxLength: 150
+                    pattern: "^[\\w.@+-]+$"
+                    description: "Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only."
                 email:
                     type: string
                     format: email
-                    title: Email address
                     maxLength: 254
                 password:
                     type: string
@@ -1300,17 +1101,15 @@ components:
                     type: string
                     writeOnly: true
                 type:
-                    allOf:
-                        - $ref: "#/components/schemas/TypeEnum"
-                    writeOnly: true
+                    $ref: "#/components/schemas/TypeEnum"
             required:
+                - username
                 - password
                 - repeated_password
                 - type
-                - username
         Review:
             type: object
-            description: Serializer for the Review model.
+            description: Schema for the Review model.
             properties:
                 id:
                     type: integer
@@ -1339,23 +1138,23 @@ components:
                     format: date-time
                     readOnly: true
             required:
-                - business_user
-                - created_at
                 - id
-                - rating
+                - business_user
                 - reviewer
+                - rating
+                - created_at
                 - updated_at
         TypeEnum:
+            type: string
             enum:
                 - business
                 - customer
-            type: string
-            description: |-
+            description: |
                 * `business` - business
                 * `customer` - customer
         User:
             type: object
-            description: Serializer for basic user information.
+            description: Schema for basic user information.
             properties:
                 first_name:
                     type: string
@@ -1365,15 +1164,14 @@ components:
                     maxLength: 150
                 username:
                     type: string
-                    description: Required. 150 characters or fewer. Letters, digits and @/./+/-/_
-                        only.
-                    pattern: ^[\w.@+-]+$
                     maxLength: 150
+                    pattern: "^[\\w.@+-]+$"
+                    description: "Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only."
             required:
                 - username
         UserProfile:
             type: object
-            description: Serializer for detailed user profile.
+            description: Schema for detailed user profile.
             properties:
                 user:
                     type: integer
@@ -1390,19 +1188,19 @@ components:
                     nullable: true
                 location:
                     type: string
-                    nullable: true
                     maxLength: 100
+                    nullable: true
                 tel:
                     type: string
-                    nullable: true
                     maxLength: 20
+                    nullable: true
                 description:
                     type: string
                     nullable: true
                 working_hours:
                     type: string
-                    nullable: true
                     maxLength: 100
+                    nullable: true
                 type:
                     $ref: "#/components/schemas/TypeEnum"
                 email:
@@ -1413,15 +1211,15 @@ components:
                     format: date-time
                     readOnly: true
             required:
-                - created_at
-                - email
-                - first_name
-                - last_name
                 - user
                 - username
+                - first_name
+                - last_name
+                - email
+                - created_at
         UserProfileBusiness:
             type: object
-            description: Serializer for business user profile.
+            description: Schema for business user profile.
             properties:
                 pk:
                     type: integer
@@ -1441,29 +1239,29 @@ components:
                     nullable: true
                 location:
                     type: string
-                    nullable: true
                     maxLength: 100
+                    nullable: true
                 tel:
                     type: string
-                    nullable: true
                     maxLength: 20
+                    nullable: true
                 description:
                     type: string
                     nullable: true
                 working_hours:
                     type: string
-                    nullable: true
                     maxLength: 100
+                    nullable: true
                 type:
                     $ref: "#/components/schemas/TypeEnum"
             required:
-                - first_name
-                - last_name
                 - pk
                 - username
+                - first_name
+                - last_name
         UserProfileCustomer:
             type: object
-            description: Serializer for customer user profile.
+            description: Schema for customer user profile.
             properties:
                 pk:
                     type: integer
@@ -1488,10 +1286,11 @@ components:
                 type:
                     $ref: "#/components/schemas/TypeEnum"
             required:
-                - first_name
-                - last_name
                 - pk
                 - username
+                - first_name
+                - last_name
+
     securitySchemes:
         tokenAuth:
             type: apiKey

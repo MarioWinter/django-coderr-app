@@ -3,7 +3,6 @@ from rest_framework import status
 from rest_framework.test import APITestCase, APIClient
 from rest_framework.authtoken.models import Token
 from django.contrib.auth import get_user_model
-
 from .models import UserProfile
 
 User = get_user_model()
@@ -11,8 +10,6 @@ User = get_user_model()
 class UserAuthAppTest(APITestCase):
     """
     Test cases for the User Authentication API endpoints.
-    This class tests user registration, login, profile retrieval, profile updates,
-    and unauthorized access scenarios.
     """
     def setUp(self):
         """Initialize test users, tokens, and profiles."""
@@ -26,7 +23,7 @@ class UserAuthAppTest(APITestCase):
             description='Test',
             working_hours='5',
             type='customer',
-            created_at = '2021-08-01T00:00:00Z'
+            created_at='2021-08-01T00:00:00Z'
         )
         self.client = APIClient(enforce_csrf_checks=True)
         self.client.credentials(HTTP_AUTHORIZATION='Token ' + self.token.key)
@@ -41,7 +38,7 @@ class UserAuthAppTest(APITestCase):
             description='Test Business Account',
             working_hours='10',
             type='business',
-            created_at = '2025-01-21T00:00:00Z'
+            created_at='2025-01-21T00:00:00Z'
         )
         self.client2 = APIClient(enforce_csrf_checks=True)
         self.client2.credentials(HTTP_AUTHORIZATION='Token ' + self.token2.key)
@@ -52,8 +49,8 @@ class UserAuthAppTest(APITestCase):
         url = reverse('registration')
         data = {
             'username': 'leonwinter',
-            'email' : 'leonwinter@gmail.com',
-            'password' : 'werte',
+            'email': 'leonwinter@gmail.com',
+            'password': 'werte',
             'repeated_password': 'werte',
             'type': 'customer'
         }
@@ -78,18 +75,19 @@ class UserAuthAppTest(APITestCase):
         url = reverse('userprofile-detail', kwargs={'pk': self.user.id})
         response = self.client.get(url)
         expected_data = {
-            'user':self.user.id,
-            'username':'testcustomeruser',
-            'first_name':'Max',
+            'user': self.user.id,
+            'username': 'testcustomeruser',
+            'first_name': 'Max',
             'last_name': 'Mustermann',
-            'file':'http://testserver/media/image.png',
-            'location':'Hamburg',
-            'tel':'+49040123456',
-            'description':'Test',
-            'working_hours':'5',
-            'type':'customer',
-            'email':'customer@gmail.com',
-            'created_at':'2021-08-01T00:00:00Z'}
+            'file': 'http://testserver/media/image.png',
+            'location': 'Hamburg',
+            'tel': '+49040123456',
+            'description': 'Test',
+            'working_hours': '5',
+            'type': 'customer',
+            'email': 'customer@gmail.com',
+            'created_at': '2021-08-01T00:00:00Z'
+        }
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data, expected_data)
     
@@ -145,7 +143,6 @@ class UserAuthAppTest(APITestCase):
         )
         self.assertNotIn('token', response.data)
 
-    
     def test_get_userprofile_detail_unauthorized(self):
         """Test that unauthorized access to a user profile detail is forbidden."""
         self.csrf_client = APIClient(enforce_csrf_checks=True)
@@ -158,7 +155,7 @@ class UserAuthAppTest(APITestCase):
         self.csrf_client = APIClient(enforce_csrf_checks=True)
         url = reverse('userprofile-detail', kwargs={'pk': self.user.id})
         data = {
-            'username':'maximustermann',
+            'username': 'maximustermann',
         }
         response = self.csrf_client.patch(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
@@ -176,5 +173,3 @@ class UserAuthAppTest(APITestCase):
         url = reverse('userprofile-business-list')
         response = self.csrf_client.get(url)
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
-    
-        
