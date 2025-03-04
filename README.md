@@ -1,4 +1,4 @@
-````markdown
+
 # Coderr API
 
 Welcome to the **Coderr API** – a modular, Django-based REST service built on the Django REST Framework (DRF). This project powers the backend for the Coderr web application, providing endpoints for offers management, orders, reviews, and user authentication and profile management.
@@ -96,7 +96,7 @@ Each app also contains its own `tests` folder covering models, views, serializer
     git clone <repository-url>
     cd Coderr_backend_v1.0.0
     ```
-````
+
 
 2. **Create and Activate a Virtual Environment**
 
@@ -321,6 +321,3 @@ const GUEST_LOGINS = {
 
 This code may be used solely for non-commercial educational purposes. Any commercial use, distribution, or modification requires the author's explicit written consent.
 
-```
-
-```
