@@ -3,6 +3,7 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.authtoken.models import Token
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.response import Response
+from django.shortcuts import get_object_or_404 
 
 from user_auth_app.models import UserProfile
 from user_auth_app.api.permissions import ProfilePermission
@@ -65,8 +66,9 @@ class UserProfileDetail(generics.RetrieveUpdateDestroyAPIView):
     def get_object(self):
         """
         Retrieves the user profile based on the user ID provided in the URL.
+        Returns a 404 error if the profile does not exist.
         """
-        obj = UserProfile.objects.get(user_id=self.kwargs['pk'])
+        obj = get_object_or_404(UserProfile, user_id=self.kwargs['pk'])
         self.check_object_permissions(self.request, obj)
         return obj
     

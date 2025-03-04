@@ -17,10 +17,11 @@ class CustomerPermission(BasePermission):
 
 class OrderPermission(BasePermission):
     """
-    Custom permission class for controlling access to the Order model.
-    Grants access to authenticated users.
-    - For DELETE requests: Only superusers are allowed to delete the order.
-    - For other requests: Users are allowed to perform actions on their own orders.
+    Permission for Order objects.
+    
+    - DELETE: Only superusers.
+    - PATCH: Only users with a business profile.
+    - Other methods: Allowed if the user's ID matches the order's business_user.
     """
     def has_permission(self, request, view):
         return request.user.is_authenticated
@@ -28,8 +29,12 @@ class OrderPermission(BasePermission):
     def has_object_permission(self, request, view, obj):
         if request.method == 'DELETE':
             return request.user.is_superuser
-        return request.user == obj.customer_user or request.user.id == obj.business_user
-
+        if request.method == 'PATCH':
+            profile = getattr(request.user, 'profile', None)
+            return profile is not None and profile.type == 'business'
+        return request.user.id == obj.business_user
+        
+        
 class IsReviewerOrAdmin(BasePermission):
     """
     Allows access only to the review's creator (reviewer) or an admin.

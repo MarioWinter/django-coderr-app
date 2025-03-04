@@ -129,7 +129,8 @@ class ReviewEndpointTests(APITestCase):
         url = reverse('reviews-detail', kwargs={'pk': self.review.id})
         data = {
             'rating': 4.5,
-            'description': "Very good service."
+            'description': "Very good service.",
+            'business_user': 9999
         }
         self.client.credentials(HTTP_AUTHORIZATION='Token ' + self.customer_token.key)
         response = self.client.patch(url, data, format='json')

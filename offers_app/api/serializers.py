@@ -5,7 +5,6 @@ from offers_app.models import Offer, OfferDetail
 from user_auth_app.api.serializers import UserSerializer
 
 
-
 class OfferDetailSerializer(serializers.ModelSerializer):
     """
     Serializer for OfferDetail model.
@@ -22,31 +21,62 @@ class OfferSerializer(serializers.ModelSerializer):
     On write operations, it accepts a list of detail objects.
     On read operations, the output is transformed (z.B. to only show URLs).
     """
-    details = OfferDetailSerializer(many=True, write_only=True)
+    details = OfferDetailSerializer(many=True)
     user_details = UserSerializer(source='user', read_only=True)
     user = serializers.PrimaryKeyRelatedField(read_only=True)
-    min_price = serializers.DecimalField(read_only=True, max_digits=10, decimal_places=2)
+    min_price = serializers.DecimalField(read_only=True, max_digits=10, decimal_places=2, coerce_to_string=False)
     min_delivery_time = serializers.IntegerField(read_only=True)
     class Meta:
         model = Offer
         fields = ['id', 'user', 'title', 'image', 'description', 'created_at', 'updated_at', 'details', 'min_price', 'min_delivery_time', 'user_details']
         
     def to_representation(self, instance):
-            """
-             Overrides output to return only URLs for detail objects when reading.
-            """
-            representation = super().to_representation(instance)
-            request = self.context.get('request')
-            if request and request.method == 'GET':
-                representation['details'] = [
+        """
+        Overrides output representation.
+        For GET requests: returns full response with extra aggregated fields and details as URLs.
+        For POST and PATCH requests: returns a simplified response with only id, title, image, description, and nested details.
+        """
+        representation = super().to_representation(instance)
+        request = self.context.get('request')
+        view = self.context.get('view')
+        if request:
+            if request.method == 'GET':
+                if view and getattr(view, 'action', None) == 'retrieve':
+                    representation = {
+                        'id': representation.get('id'),
+                        'title': representation.get('title'),
+                        'image': representation.get('image'),
+                        'description': representation.get('description'),
+                        'created_at': representation.get('created_at'),
+                        'updated_at': representation.get('updated_at'),
+                        'details': [
+                            {
+                                'id': detail.id,
+                                'url': reverse('offerdetails-detail', kwargs={'pk': detail.id}, request=request)
+                            }
+                            for detail in instance.details.all()
+                        ],
+                        'min_price': representation.get('min_price'),
+                        'min_delivery_time': representation.get('min_delivery_time')
+                    }
+                else:
+                    representation['details'] = [
                     {
                         'id': detail.id,
                         'url': reverse('offerdetails-detail', kwargs={'pk': detail.id}, request=request)
                     }
                     for detail in instance.details.all()
                 ]
-            return representation
-        
+            elif request.method == 'POST' or request.method == 'PATCH':
+                representation = {
+                    'id': representation.get('id'),
+                    'title': representation.get('title'),
+                    'image': representation.get('image'),
+                    'description': representation.get('description'),
+                    'details': representation.get('details')
+                }
+        return representation
+                    
     def validate_details(self, value):
         """
         Validates that the details list contains exactly three unique offer types on POST requests.

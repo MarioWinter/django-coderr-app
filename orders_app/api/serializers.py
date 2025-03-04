@@ -12,6 +12,7 @@ class OrderSerializer(serializers.ModelSerializer):
     Serializer for the Order model.
     """
     offer_detail_id = serializers.PrimaryKeyRelatedField(queryset=OfferDetail.objects.all(), write_only=True)
+    price = serializers.DecimalField(read_only=True, max_digits=10, decimal_places=2, coerce_to_string=False)
     customer_user = serializers.PrimaryKeyRelatedField(read_only=True)
     class Meta:
         model = Order
@@ -61,7 +62,7 @@ class ReviewSerializer(serializers.ModelSerializer):
             reviewer = request.user
             business_user = data.get('business_user')
             if Review.objects.filter(reviewer=reviewer, business_user=business_user).exists():
-                raise serializers.ValidationError("You have already submitted a review for this business user.")
+                raise serializers.ValidationError({"detail":"You have already submitted a review for this business user."})
         return data
 
     def create(self, validated_data):
@@ -71,3 +72,17 @@ class ReviewSerializer(serializers.ModelSerializer):
         reviewer = self.context['request'].user
         validated_data['reviewer'] = reviewer
         return super().create(validated_data)
+    
+    def update(self, instance, validated_data):
+        """
+        Update the review instance.
+        Only the fields 'rating' and 'description' are processed. All other fields are ignored.
+        """
+        allowed_fields = {'rating', 'description'}
+        for field in allowed_fields:
+            if field in validated_data:
+                setattr(instance, field, validated_data[field])
+            else:
+                raise serializers.ValidationError({"detail":"The request body contains invalid data."})
+        instance.save()
+        return instance

@@ -1,10 +1,20 @@
 from rest_framework.permissions import BasePermission
+from user_auth_app.models import UserProfile
 
 class IsProviderOrReadOnly(BasePermission):
-    """Allows only authenticated users to create offers. Read access is granted to everyone."""
+    """
+    Allows only authenticated business users to create offers.
+    Read access is granted to everyone.
+    """
     def has_permission(self, request, view):
         if request.method == 'POST':
-            return request.user.is_authenticated
+            if not request.user.is_authenticated:
+                return False
+            try:
+                profile = request.user.profile
+            except UserProfile.DoesNotExist:
+                return False
+            return profile.type == UserProfile.UserType.BUSINESS
         return True
 
 class IsOwnerOrAdmin(BasePermission):

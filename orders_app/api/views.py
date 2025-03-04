@@ -68,7 +68,7 @@ class OrderCountView(APIView):
     Returns:
         JSON response with key 'order_count' on success, or an error message.
     """
-    permission_classes = []
+    permission_classes = [IsAuthenticated]
     serializer_class = OrderCountSerializer
 
     def get(self, request, business_user_id):
@@ -95,7 +95,7 @@ class CompletedOrderCountView(APIView):
     Returns:
         JSON response with key 'completed_order_count' on success, or an error message.
     """
-    permission_classes = []
+    permission_classes = [IsAuthenticated]
     serializer_class = CompletedOrderCountSerializer
     def get(self, request, business_user_id):
         """
