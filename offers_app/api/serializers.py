@@ -44,6 +44,7 @@ class OfferSerializer(serializers.ModelSerializer):
                 if view and getattr(view, 'action', None) == 'retrieve':
                     representation = {
                         'id': representation.get('id'),
+                        'user': representation.get('user'),
                         'title': representation.get('title'),
                         'image': representation.get('image'),
                         'description': representation.get('description'),
@@ -119,8 +120,12 @@ class OfferSerializer(serializers.ModelSerializer):
     
     def update(self, instance, validated_data):
         """
-        Updates an offer and its details, and recalculates aggregated fields.
+        Updates an offer and its details, recalculates aggregated fields, and ensures that no extra fields are provided.
         """
+        extra_fields = set(self.initial_data.keys()) - set(self.fields.keys())
+        if extra_fields:
+            raise serializers.ValidationError({"detail": f"Extra fields not allowed: {', '.join(extra_fields)}"})
+        
         details_data = validated_data.pop('details', None)
         with transaction.atomic():
             instance = super().update(instance, validated_data)

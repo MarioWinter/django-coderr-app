@@ -30,8 +30,7 @@ class OrderPermission(BasePermission):
         if request.method == 'DELETE':
             return request.user.is_superuser
         if request.method == 'PATCH':
-            profile = getattr(request.user, 'profile', None)
-            return profile is not None and profile.type == 'business'
+            return request.user.id == obj.business_user
         return request.user.id == obj.business_user
         
         

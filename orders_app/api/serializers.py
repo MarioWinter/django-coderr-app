@@ -7,10 +7,13 @@ from offers_app.models import OfferDetail
 
 User = get_user_model()
 
+ALLOWED_STATUS = ['in_progress', 'completed', 'cancelled']
+
 class OrderSerializer(serializers.ModelSerializer):
     """
     Serializer for the Order model.
     """
+    status = serializers.CharField(required=False)
     offer_detail_id = serializers.PrimaryKeyRelatedField(queryset=OfferDetail.objects.all(), write_only=True)
     price = serializers.DecimalField(read_only=True, max_digits=10, decimal_places=2, coerce_to_string=False)
     customer_user = serializers.PrimaryKeyRelatedField(read_only=True)
@@ -20,6 +23,23 @@ class OrderSerializer(serializers.ModelSerializer):
         read_only_fields = ['id', 'customer_user', 'business_user', 'title', 'revisions', 'delivery_time_in_days', 'price', 'features', 'offer_type', 'created_at', 'updated_at']
         write_only_fields = ['offer_detail_id']
         
+    def to_internal_value(self, data):
+        """
+        Rejects any extra fields not defined in the serializer.
+        """
+        extra_fields = set(data.keys()) - set(self.fields.keys())
+        if extra_fields:
+            raise serializers.ValidationError({"detail": f"Extra fields not allowed: {', '.join(extra_fields)}"})
+        return super().to_internal_value(data)
+    
+    def validate_status(self, value):
+        """
+        Validates that the status field is one of the allowed values.
+        """
+        if value not in ALLOWED_STATUS:
+            raise serializers.ValidationError("status is not allowed")
+        return value
+    
     def create(self, validated_data):
         """
         Create a new order by populating fields from the offer details.

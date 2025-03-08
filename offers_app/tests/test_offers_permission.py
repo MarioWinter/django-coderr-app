@@ -81,10 +81,10 @@ class OfferPermissionTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_unauthenticated_user_read(self):
-        """Test unauthenticated user can read offers"""
+        """Test unauthenticated user cannot read offers"""
         url = reverse('offers-detail', kwargs={'pk': self.offer_id})
         response = self.client.get(url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_non_owner_update(self):
         """Test non-owner cannot update offers"""

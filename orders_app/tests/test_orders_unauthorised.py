@@ -96,4 +96,4 @@ class OrderUnauthorisedTests(APITestCase):
         self.client.force_authenticate(user=self.other_user)
         url = reverse('orders-detail', kwargs={'pk': self.order.id})
         response = self.client.patch(url, {'status': 'completed'})
-        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
